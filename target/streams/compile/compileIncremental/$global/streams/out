@@ -1,0 +1,366 @@
+[0m[[0mdebug[0m] [0m[naha] [0m
+[0m[[0mdebug[0m] [0m[naha] Initial source changes: [0m
+[0m[[0mdebug[0m] [0m[naha] 	removed:Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	added: Set(C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Regrowth.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\CounterShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Gore.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\auras\Aura.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AspectOfTheTurtle.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\priest\Smite.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Tranquility.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\GDI32Extra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\CobraShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidResto.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\RevivePet.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Team.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Flourish.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\modules\BindingModule.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Moonfire.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AMurderOfCrows.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\Paint.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Ironbark.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Exception.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Keys.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\Spell.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Swipe.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\WinGDI.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\HealingTouch.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\WowClass.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\Exhilaration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SurvivalInstincts.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Mangle.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Germination.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\StdCallLibraryExtra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\HunterBM.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\FrenziedRegeneration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Maul.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Sunfire.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Ironfur.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\BestialWrath.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\MultiShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\TitansThunder.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\BearForm.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Color.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\WildGrowth.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\User32Extra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidGuardian.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Growl.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\GDI32Extra.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\Configuration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Trash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Swiftmend.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Barkskin.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Innervate.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\SpellTargetType.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\RageOfTheSleeper.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SolarWrath.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Renewal.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Clearcasting.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Lifebloom.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\MightyBash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\DireBeast.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\priest\ShadowWordPain.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SkullBash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AspectOfTheWild.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Efflorescence.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\ScaleAction.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\EssenceOfGHanir.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\WinGDIExtra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\KillCommand.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Priest.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Rejuvenation.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] 	modified: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidated products: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] External API changes: API Changes: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Modified binary dependencies: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] Initial directly invalidated sources: Set(C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Regrowth.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\CounterShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Gore.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\auras\Aura.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AspectOfTheTurtle.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\priest\Smite.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Tranquility.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\GDI32Extra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\CobraShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidResto.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\RevivePet.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Team.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Flourish.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\modules\BindingModule.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Moonfire.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AMurderOfCrows.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\Paint.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Ironbark.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Exception.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Keys.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\Spell.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Swipe.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\WinGDI.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\HealingTouch.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\WowClass.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\Exhilaration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SurvivalInstincts.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Mangle.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Germination.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\StdCallLibraryExtra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\HunterBM.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\FrenziedRegeneration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Maul.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Sunfire.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Ironfur.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\BestialWrath.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\MultiShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\TitansThunder.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\BearForm.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Color.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\WildGrowth.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\User32Extra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidGuardian.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Growl.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\GDI32Extra.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\Configuration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Trash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Swiftmend.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Barkskin.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Innervate.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\SpellTargetType.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\RageOfTheSleeper.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SolarWrath.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Renewal.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Clearcasting.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Lifebloom.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\MightyBash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\DireBeast.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\priest\ShadowWordPain.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SkullBash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AspectOfTheWild.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Efflorescence.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\ScaleAction.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\EssenceOfGHanir.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\WinGDIExtra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\KillCommand.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Priest.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Rejuvenation.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] [0m
+[0m[[0mdebug[0m] [0m[naha] Sources indirectly invalidated by:[0m
+[0m[[0mdebug[0m] [0m[naha] 	product: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	binary dep: Set()[0m
+[0m[[0mdebug[0m] [0m[naha] 	external source: Set()[0m
+[0m[[0mdebug[0m] [0mAll initially invalidated sources: Set(C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Regrowth.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\CounterShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Gore.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\auras\Aura.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AspectOfTheTurtle.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\priest\Smite.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Tranquility.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\GDI32Extra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\CobraShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidResto.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\RevivePet.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Team.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Flourish.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\modules\BindingModule.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Moonfire.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AMurderOfCrows.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\Paint.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Ironbark.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Exception.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Keys.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\Spell.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Swipe.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\WinGDI.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\HealingTouch.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\WowClass.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\Exhilaration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SurvivalInstincts.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Mangle.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Germination.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\StdCallLibraryExtra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\HunterBM.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\FrenziedRegeneration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Maul.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Sunfire.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Ironfur.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\BestialWrath.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\MultiShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\TitansThunder.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\BearForm.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Color.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\WildGrowth.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\User32Extra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidGuardian.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Growl.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\GDI32Extra.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\Configuration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Trash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Swiftmend.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Barkskin.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Innervate.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\SpellTargetType.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\RageOfTheSleeper.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SolarWrath.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Renewal.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Clearcasting.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Lifebloom.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\MightyBash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\DireBeast.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\priest\ShadowWordPain.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SkullBash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AspectOfTheWild.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Efflorescence.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\ScaleAction.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\EssenceOfGHanir.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\WinGDIExtra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\KillCommand.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Priest.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Rejuvenation.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Initial set of included nodes: Set(C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Regrowth.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\CounterShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Gore.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\auras\Aura.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AspectOfTheTurtle.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\priest\Smite.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Tranquility.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\GDI32Extra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\CobraShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidResto.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\RevivePet.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Team.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Flourish.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\modules\BindingModule.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Moonfire.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AMurderOfCrows.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\Paint.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Ironbark.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Exception.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Keys.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\Spell.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Swipe.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\WinGDI.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\HealingTouch.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\WowClass.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\Exhilaration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SurvivalInstincts.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Mangle.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Germination.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\StdCallLibraryExtra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\HunterBM.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\FrenziedRegeneration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Maul.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Sunfire.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Ironfur.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\BestialWrath.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\MultiShot.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\TitansThunder.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\BearForm.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\Color.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\WildGrowth.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\User32Extra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidGuardian.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Growl.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\GDI32Extra.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\Configuration.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Trash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Swiftmend.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Barkskin.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Innervate.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\SpellTargetType.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\RageOfTheSleeper.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SolarWrath.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Renewal.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Clearcasting.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Lifebloom.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\MightyBash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\DireBeast.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\priest\ShadowWordPain.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\SkullBash.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\AspectOfTheWild.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Efflorescence.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\ScaleAction.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\EssenceOfGHanir.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\test\WinGDIExtra.java, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\hunter\KillCommand.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Priest.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\models\spells\druid\Rejuvenation.scala, C:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Recompiling all 75 sources: invalidated sources (75) exceeded 50.0% of all sources[0m
+[0m[[0minfo[0m] [0mCompiling 70 Scala sources and 5 Java sources to C:\Users\charly-windows\code\chloe\target\scala-2.11\classes...[0m
+[0m[[0mdebug[0m] [0mGetting org.scala-sbt:compiler-interface:0.13.15:component from component compiler for Scala 2.11.8[0m
+[0m[[0minfo[0m] [0m'compiler-interface' not yet compiled for Scala 2.11.8. Compiling...[0m
+[0m[[0mdebug[0m] [0mPlain interface to Scala compiler 2.11.8  with arguments: [0m
+[0m[[0mdebug[0m] [0m	-nowarn[0m
+[0m[[0mdebug[0m] [0m	-d[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_8e877138[0m
+[0m[[0mdebug[0m] [0m	-bootclasspath[0m
+[0m[[0mdebug[0m] [0m	C:\Program Files\Java\jre1.8.0_162\lib\resources.jar;C:\Program Files\Java\jre1.8.0_162\lib\rt.jar;C:\Program Files\Java\jre1.8.0_162\lib\sunrsasign.jar;C:\Program Files\Java\jre1.8.0_162\lib\jsse.jar;C:\Program Files\Java\jre1.8.0_162\lib\jce.jar;C:\Program Files\Java\jre1.8.0_162\lib\charsets.jar;C:\Program Files\Java\jre1.8.0_162\lib\jfr.jar;C:\Program Files\Java\jre1.8.0_162\classes;C:\Users\charly-windows\.ivy2\cache\org.scala-lang\scala-library\jars\scala-library-2.11.8.jar[0m
+[0m[[0mdebug[0m] [0m	-classpath[0m
+[0m[[0mdebug[0m] [0m	C:\Users\charly-windows\.sbt\boot\scala-2.10.6\org.scala-sbt\sbt\0.13.15\xsbti\interface-0.13.15.jar;C:\Users\CHARLY~1\AppData\Local\Temp\sbt_841c8076\srcs\org.scala-sbt\compiler-interface\compiler-interface-0.13.15-sources.jar;C:\Users\charly-windows\.ivy2\cache\org.scala-lang\scala-compiler\jars\scala-compiler-2.11.8.jar;C:\Users\charly-windows\.ivy2\cache\org.scala-lang\scala-reflect\jars\scala-reflect-2.11.8.jar;C:\Users\charly-windows\.ivy2\cache\org.scala-lang.modules\scala-xml_2.11\bundles\scala-xml_2.11-1.0.4.jar;C:\Users\charly-windows\.ivy2\cache\org.scala-lang.modules\scala-parser-combinators_2.11\bundles\scala-parser-combinators_2.11-1.0.4.jar;C:\Users\charly-windows\.ivy2\cache\jline\jline\jars\jline-2.12.1.jar[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\API.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\Analyzer.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\Command.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\Compat.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\CompilerInterface.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\ConsoleInterface.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\DelegatingReporter.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\Dependency.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\ExtractAPI.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\ExtractUsedNames.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\GlobalHelpers.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\LocateClassFile.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\Log.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\Message.scala[0m
+[0m[[0mdebug[0m] [0m	C:\Users\CHARLY~1\AppData\Local\Temp\sbt_a0107bc7\xsbt\ScaladocInterface.scala[0m
+[0m[[0minfo[0m] [0m  Compilation completed in 7.42 s[0m
+[0m[[0mdebug[0m] [0mGetting org.scala-sbt:compiler-interface:0.13.15:component from component compiler for Scala 2.11.8[0m
+[0m[[0mdebug[0m] [0mRunning cached compiler 6671f65e, interfacing (CompilerInterface) with Scala compiler version 2.11.8[0m
+[0m[[0mdebug[0m] [0mCalling Scala compiler with arguments  (CompilerInterface):[0m
+[0m[[0mdebug[0m] [0m	-deprecation[0m
+[0m[[0mdebug[0m] [0m	-unchecked[0m
+[0m[[0mdebug[0m] [0m	-encoding[0m
+[0m[[0mdebug[0m] [0m	utf8[0m
+[0m[[0mdebug[0m] [0m	-bootclasspath[0m
+[0m[[0mdebug[0m] [0m	C:\Program Files\Java\jre1.8.0_162\lib\resources.jar;C:\Program Files\Java\jre1.8.0_162\lib\rt.jar;C:\Program Files\Java\jre1.8.0_162\lib\sunrsasign.jar;C:\Program Files\Java\jre1.8.0_162\lib\jsse.jar;C:\Program Files\Java\jre1.8.0_162\lib\jce.jar;C:\Program Files\Java\jre1.8.0_162\lib\charsets.jar;C:\Program Files\Java\jre1.8.0_162\lib\jfr.jar;C:\Program Files\Java\jre1.8.0_162\classes;C:\Users\charly-windows\.ivy2\cache\org.scala-lang\scala-library\jars\scala-library-2.11.8.jar[0m
+[0m[[0mdebug[0m] [0m	-classpath[0m
+[0m[[0mdebug[0m] [0m	C:\Users\charly-windows\code\chloe\target\scala-2.11\classes;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\twirl-api_2.11\jars\twirl-api_2.11-1.3.12.jar;C:\Users\charly-windows\.ivy2\cache\org.scala-lang.modules\scala-xml_2.11\bundles\scala-xml_2.11-1.0.6.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-server_2.11\jars\play-server_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play_2.11\jars\play_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\build-link\jars\build-link-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-exceptions\jars\play-exceptions-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-netty-utils\jars\play-netty-utils-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\org.slf4j\slf4j-api\jars\slf4j-api-1.7.25.jar;C:\Users\charly-windows\.ivy2\cache\org.slf4j\jul-to-slf4j\jars\jul-to-slf4j-1.7.25.jar;C:\Users\charly-windows\.ivy2\cache\org.slf4j\jcl-over-slf4j\jars\jcl-over-slf4j-1.7.25.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-streams_2.11\jars\play-streams_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\org.reactivestreams\reactive-streams\jars\reactive-streams-1.0.1.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.akka\akka-stream_2.11\jars\akka-stream_2.11-2.5.6.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.akka\akka-actor_2.11\jars\akka-actor_2.11-2.5.6.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe\config\bundles\config-1.3.1.jar;C:\Users\charly-windows\.ivy2\cache\org.scala-lang.modules\scala-java8-compat_2.11\bundles\scala-java8-compat_2.11-0.8.0.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe\ssl-config-core_2.11\bundles\ssl-config-core_2.11-0.2.2.jar;C:\Users\charly-windows\.ivy2\cache\org.scala-lang.modules\scala-parser-combinators_2.11\bundles\scala-parser-combinators_2.11-1.0.6.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.akka\akka-slf4j_2.11\jars\akka-slf4j_2.11-2.5.6.jar;C:\Users\charly-windows\.ivy2\cache\com.fasterxml.jackson.core\jackson-core\bundles\jackson-core-2.8.10.jar;C:\Users\charly-windows\.ivy2\cache\com.fasterxml.jackson.core\jackson-annotations\bundles\jackson-annotations-2.8.10.jar;C:\Users\charly-windows\.ivy2\cache\com.fasterxml.jackson.core\jackson-databind\bundles\jackson-databind-2.8.10.jar;C:\Users\charly-windows\.ivy2\cache\com.fasterxml.jackson.datatype\jackson-datatype-jdk8\bundles\jackson-datatype-jdk8-2.8.10.jar;C:\Users\charly-windows\.ivy2\cache\com.fasterxml.jackson.datatype\jackson-datatype-jsr310\bundles\jackson-datatype-jsr310-2.8.10.jar;C:\Users\charly-windows\.ivy2\cache\commons-codec\commons-codec\jars\commons-codec-1.10.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-json_2.11\jars\play-json_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-functional_2.11\jars\play-functional_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\org.scala-lang\scala-reflect\jars\scala-reflect-2.11.8.jar;C:\Users\charly-windows\.ivy2\cache\org.typelevel\macro-compat_2.11\jars\macro-compat_2.11-1.1.1.jar;C:\Users\charly-windows\.ivy2\cache\joda-time\joda-time\jars\joda-time-2.9.9.jar;C:\Users\charly-windows\.ivy2\cache\com.google.guava\guava\bundles\guava-22.0.jar;C:\Users\charly-windows\.ivy2\cache\com.google.code.findbugs\jsr305\jars\jsr305-1.3.9.jar;C:\Users\charly-windows\.ivy2\cache\com.google.errorprone\error_prone_annotations\jars\error_prone_annotations-2.0.18.jar;C:\Users\charly-windows\.ivy2\cache\com.google.j2objc\j2objc-annotations\jars\j2objc-annotations-1.1.jar;C:\Users\charly-windows\.ivy2\cache\org.codehaus.mojo\animal-sniffer-annotations\jars\animal-sniffer-annotations-1.14.jar;C:\Users\charly-windows\.ivy2\cache\io.jsonwebtoken\jjwt\jars\jjwt-0.7.0.jar;C:\Users\charly-windows\.ivy2\cache\org.apache.commons\commons-lang3\jars\commons-lang3-3.6.jar;C:\Users\charly-windows\.ivy2\cache\javax.transaction\jta\jars\jta-1.1.jar;C:\Users\charly-windows\.ivy2\cache\javax.inject\javax.inject\jars\javax.inject-1.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\filters-helpers_2.11\jars\filters-helpers_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-logback_2.11\jars\play-logback_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\ch.qos.logback\logback-classic\jars\logback-classic-1.2.3.jar;C:\Users\charly-windows\.ivy2\cache\ch.qos.logback\logback-core\jars\logback-core-1.2.3.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-akka-http-server_2.11\jars\play-akka-http-server_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.akka\akka-http-core_2.11\jars\akka-http-core_2.11-10.0.10.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.akka\akka-parsing_2.11\jars\akka-parsing_2.11-10.0.10.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-guice_2.11\jars\play-guice_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.google.inject\guice\jars\guice-4.1.0.jar;C:\Users\charly-windows\.ivy2\cache\aopalliance\aopalliance\jars\aopalliance-1.0.jar;C:\Users\charly-windows\.ivy2\cache\com.google.inject.extensions\guice-assistedinject\jars\guice-assistedinject-4.1.0.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-ahc-ws_2.11\jars\play-ahc-ws_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-ws_2.11\jars\play-ws_2.11-2.6.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-ws-standalone_2.11\jars\play-ws-standalone_2.11-1.1.3.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-ws-standalone-xml_2.11\jars\play-ws-standalone-xml_2.11-1.1.3.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-ws-standalone-json_2.11\jars\play-ws-standalone-json_2.11-1.1.3.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\play-ahc-ws-standalone_2.11\jars\play-ahc-ws-standalone_2.11-1.1.3.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\cachecontrol_2.11\jars\cachecontrol_2.11-1.1.2.jar;C:\Users\charly-windows\.ivy2\cache\org.joda\joda-convert\jars\joda-convert-1.7.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\shaded-asynchttpclient\jars\shaded-asynchttpclient-1.1.3.jar;C:\Users\charly-windows\.ivy2\cache\com.typesafe.play\shaded-oauth\jars\shaded-oauth-1.1.3.jar;C:\Users\charly-windows\.ivy2\cache\javax.cache\cache-api\jars\cache-api-1.0.0.jar;C:\Users\charly-windows\.ivy2\cache\org.slf4j\log4j-over-slf4j\jars\log4j-over-slf4j-1.7.21.jar;C:\Users\charly-windows\.ivy2\cache\net.java.dev.jna\jna\jars\jna-4.5.1.jar[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:5: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HBITMAP[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:6: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HDC[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:7: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HWND[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:8: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.RECT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:9: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:10: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI.BITMAPINFO[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:11: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinNT.HANDLE[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:13: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:16: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.WNDENUMPROC[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:18: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:25: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.BaseTSD._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:28: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HMODULE[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:29: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.LRESULT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:30: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.WPARAM[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:31: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.LPARAM[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:32: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:33: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.HHOOK[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:34: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.KBDLLHOOKSTRUCT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:35: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.LowLevelKeyboardProc[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:36: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.MSG[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:11: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:16: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:12: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HWND[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:45: not found: type HWND[0m
+[0m[[31merror[0m] [0m  def getWindows(pattern: String): List[HWND] = {[0m
+[0m[[31merror[0m] [0m                                        ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala:4: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.{ Kernel32 => JnaKernel32, _ }[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala:7: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.RECT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala:6: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HWND[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala:5: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HDC[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:4: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.{ User32 => JnaUser32 }[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:14: not found: type JnaUser32[0m
+[0m[[31merror[0m] [0mtrait User32Extra extends JnaUser32 with StdCallLibrary with WinUser with WinNT {[0m
+[0m[[31merror[0m] [0m                          ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:10: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:14: not found: type WinUser[0m
+[0m[[31merror[0m] [0mtrait User32Extra extends JnaUser32 with StdCallLibrary with WinUser with WinNT {[0m
+[0m[[31merror[0m] [0m                                                             ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:9: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinNT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:14: not found: type WinNT[0m
+[0m[[31merror[0m] [0mtrait User32Extra extends JnaUser32 with StdCallLibrary with WinUser with WinNT {[0m
+[0m[[31merror[0m] [0m                                                                          ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:7: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HWND[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:22: not found: type HWND[0m
+[0m[[31merror[0m] [0m  def GetWindowTextA(hWnd: HWND, lpString: Array[Byte], nMaxCount: Int): Int[0m
+[0m[[31merror[0m] [0m                           ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:72: not found: type HWND[0m
+[0m[[31merror[0m] [0m  def getWindowTitleImpl(hWindow: HWND) = {[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidResto.scala:9: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidResto.scala:14: not found: type HWND[0m
+[0m[[31merror[0m] [0m  hWindow: HWND,[0m
+[0m[[31merror[0m] [0m           ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\HunterBM.scala:9: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\HunterBM.scala:14: not found: type HWND[0m
+[0m[[31merror[0m] [0m  hWindow: HWND,[0m
+[0m[[31merror[0m] [0m           ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidGuardian.scala:9: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\DruidGuardian.scala:14: not found: type HWND[0m
+[0m[[31merror[0m] [0m  hWindow: HWND,[0m
+[0m[[31merror[0m] [0m           ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Team.scala:13: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Team.scala:18: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Team.scala:25: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.BaseTSD._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:126: not found: type HHOOK[0m
+[0m[[31merror[0m] [0m        var hhk: HHOOK = null[0m
+[0m[[31merror[0m] [0m                 ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\package.scala:23: not found: value JnaKernel32[0m
+[0m[[31merror[0m] [0m  val Kernel32 = JnaKernel32.INSTANCE[0m
+[0m[[31merror[0m] [0m                 ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:128: not found: type LowLevelKeyboardProc[0m
+[0m[[31merror[0m] [0m        val keyboardHook = new LowLevelKeyboardProc() {[0m
+[0m[[31merror[0m] [0m                               ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:129: not found: type LRESULT[0m
+[0m[[31merror[0m] [0m          def callback(nCode: Int, wParam: WPARAM, info: KBDLLHOOKSTRUCT): LRESULT = {[0m
+[0m[[31merror[0m] [0m                                                                           ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:129: not found: type WPARAM[0m
+[0m[[31merror[0m] [0m          def callback(nCode: Int, wParam: WPARAM, info: KBDLLHOOKSTRUCT): LRESULT = {[0m
+[0m[[31merror[0m] [0m                                           ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:129: not found: type KBDLLHOOKSTRUCT[0m
+[0m[[31merror[0m] [0m          def callback(nCode: Int, wParam: WPARAM, info: KBDLLHOOKSTRUCT): LRESULT = {[0m
+[0m[[31merror[0m] [0m                                                         ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:132: not found: value WinUser[0m
+[0m[[31merror[0m] [0m                case WinUser.WM_KEYDOWN =>[0m
+[0m[[31merror[0m] [0m                     ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:145: value CallNextHookEx is not a member of net.chloe.win32.User32Extra[0m
+[0m[[31merror[0m] [0m            return User32.CallNextHookEx(hhk, nCode, wParam, new LPARAM(peer))[0m
+[0m[[31merror[0m] [0m                          ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:145: not found: type LPARAM[0m
+[0m[[31merror[0m] [0m            return User32.CallNextHookEx(hhk, nCode, wParam, new LPARAM(peer))[0m
+[0m[[31merror[0m] [0m                                                                 ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:149: value SetWindowsHookEx is not a member of net.chloe.win32.User32Extra[0m
+[0m[[31merror[0m] [0m        hhk = User32.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardHook, hMod, 0)[0m
+[0m[[31merror[0m] [0m                     ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:149: not found: value WinUser[0m
+[0m[[31merror[0m] [0m        hhk = User32.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardHook, hMod, 0)[0m
+[0m[[31merror[0m] [0m                                      ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:150: value GetMessage is not a member of net.chloe.win32.User32Extra[0m
+[0m[[31merror[0m] [0m        User32.GetMessage(new MSG(), null, 0, 0)[0m
+[0m[[31merror[0m] [0m               ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:150: not found: type MSG[0m
+[0m[[31merror[0m] [0m        User32.GetMessage(new MSG(), null, 0, 0)[0m
+[0m[[31merror[0m] [0m                              ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:13: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.RECT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:79: not found: type RECT[0m
+[0m[[31merror[0m] [0m    val targetWindowBounds = new RECT()[0m
+[0m[[31merror[0m] [0m                                 ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:18: not found: type HWND[0m
+[0m[[31merror[0m] [0m  def GetClientRect(hWnd: HWND, rect: RECT): Boolean[0m
+[0m[[31merror[0m] [0m                          ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:8: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.RECT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:18: not found: type RECT[0m
+[0m[[31merror[0m] [0m  def GetClientRect(hWnd: HWND, rect: RECT): Boolean[0m
+[0m[[31merror[0m] [0m                                      ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\WowClass.scala:8: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\WowClass.scala:28: not found: type HWND[0m
+[0m[[31merror[0m] [0m  val hWindow: HWND[0m
+[0m[[31merror[0m] [0m               ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:17: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.WNDENUMPROC[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:15: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI.BITMAPINFO[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Wow.scala:14: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\win32\User32Extra.scala:26: not found: type HWND[0m
+[0m[[31merror[0m] [0m  def SendMessage(hWnd: HWND, Msg: Int, wParam: Int, lParam: Int): Int[0m
+[0m[[31merror[0m] [0m                        ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:182: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : Any[0m
+[0m[[31merror[0m] [0m required: Int[0m
+[0m[[31merror[0m] [0m          widthOpt = Some(width),[0m
+[0m[[31merror[0m] [0m                          ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:183: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : Any[0m
+[0m[[31merror[0m] [0m required: Int[0m
+[0m[[31merror[0m] [0m          heightOpt = Some(height),[0m
+[0m[[31merror[0m] [0m                           ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:188: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : Any[0m
+[0m[[31merror[0m] [0m required: Long[0m
+[0m[[31merror[0m] [0m        findMobOnScreenOpt(0, 0, width, height, screenshot, nextMobColor) match {[0m
+[0m[[31merror[0m] [0m                                 ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:188: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : Any[0m
+[0m[[31merror[0m] [0m required: Long[0m
+[0m[[31merror[0m] [0m        findMobOnScreenOpt(0, 0, width, height, screenshot, nextMobColor) match {[0m
+[0m[[31merror[0m] [0m                                        ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\Main.scala:189: too many arguments for method apply: (x: A)Some[A] in object Some[0m
+[0m[[31merror[0m] [0m          case Some(mobCoordinates) => Some(nextMobName, mobCoordinates)[0m
+[0m[[31merror[0m] [0m                                           ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala:9: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala:15: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala:21: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.BaseTSD._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala:13: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.WNDENUMPROC[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala:7: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI.BITMAPINFO[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala:6: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala:5: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.RECT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Player.scala:4: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HWND[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala:9: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala:15: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala:22: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.BaseTSD._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala:13: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.WNDENUMPROC[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala:7: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI.BITMAPINFO[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala:6: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala:5: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.RECT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Target.scala:4: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HWND[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala:9: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala:15: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala:21: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.BaseTSD._[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala:13: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.WNDENUMPROC[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala:7: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI.BITMAPINFO[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala:6: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinGDI[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala:5: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.RECT[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\wow\Pet.scala:4: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinDef.HWND[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0mC:\Users\charly-windows\code\chloe\app\net\chloe\models\classes\Team.scala:36: object platform is not a member of package com.sun.jna[0m
+[0m[[31merror[0m] [0mimport com.sun.jna.platform.win32.WinUser.MSG[0m
+[0m[[31merror[0m] [0m                   ^[0m
+[0m[[31merror[0m] [0m162 errors found[0m
+[0m[[0mdebug[0m] [0mCompilation failed (CompilerInterface)[0m
+[0m[[31merror[0m] [0m(compile:[31mcompileIncremental[0m) Compilation failed[0m
