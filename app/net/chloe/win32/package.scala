@@ -1,0 +1,25 @@
+package net.chloe
+
+import com.sun.jna.Native
+import com.sun.jna.platform.win32.{ Kernel32 => JnaKernel32, _ }
+import com.sun.jna.platform.win32.WinDef.HDC
+import com.sun.jna.platform.win32.WinDef.HWND
+import com.sun.jna.platform.win32.WinDef.RECT
+import com.sun.jna.win32.W32APIOptions
+import com.sun.jna.Pointer
+import com.sun.jna.Native
+import com.sun.jna.win32.StdCallLibrary
+
+package object win32 {
+  
+  val User32 = Native
+    .loadLibrary("user32", classOf[User32Extra], W32APIOptions.DEFAULT_OPTIONS)
+    .asInstanceOf[User32Extra]
+  
+  val GDI32 = Native
+    .loadLibrary("gdi32", classOf[GDI32Extra], W32APIOptions.DEFAULT_OPTIONS)
+    .asInstanceOf[GDI32Extra]
+  
+  val Kernel32 = JnaKernel32.INSTANCE
+
+}
