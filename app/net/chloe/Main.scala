@@ -151,115 +151,13 @@ object Main {
       }
     }
   }
-  
-  def findMobOnScreenOpt(
-    x: Int, y: Int, width: Long, height: Long, screenshot: BufferedImage, targetColor: Color
-  )(
-    implicit player: WowClass
-  ): Option[(Long, Long)] = {
-    val color = Color(screenshot.getRGB(x, y))
-    
-    if (color == targetColor) {
-      Some((x, y))
-    } else {
-      if (x == width - 1) {
-        if (y == height - 1) {
-          None
-        } else {
-          findMobOnScreenOpt(0, y + 1, width, height, screenshot, targetColor)
-        }
-      } else {
-        findMobOnScreenOpt(x + 1, y, width, height, screenshot, targetColor)
-      }
-    }
-  }
-  
-  def findFirstMobOpt(mobs: List[(String, Color)])(implicit player: WowClass): Option[(String, (Long, Long))] ={
-    mobs.headOption match {
-      case Some((nextMobName, nextMobColor)) =>
-        val (width, height) = Wow.getWindowSize
-        val screenshot = Wow.capture(
-          widthOpt = Some(width),
-          heightOpt = Some(height),
-          columnOpt = Some(0),
-          rowOpt = Some(0)
-        )
-    
-        findMobOnScreenOpt(0, 0, width, height, screenshot, nextMobColor) match {
-          case Some(mobCoordinates) => Some(nextMobName, mobCoordinates)
-          case _ => 
-            val nextMobs = mobs.tail
-            
-            if (nextMobs.isEmpty) {
-              None
-            } else {
-              findFirstMobOpt(nextMobs)
-            }
-        }
-      case _ => None
-    }
-  }
-  
+
   def startDirectionBot(implicit team: Team) = Future {
     while (!stop) {
       if (directionBotRunning) {
-        val directPlayersFutures = Future.traverse(team.players) { case (_, player) =>
-          Future {
-            blocking {
-              implicit val me = player
-              
-              if (Wow.isSlave) {
-                findFirstMobOpt(Configuration.Nameplates.PriorityMobs.toList) match {
-                  case Some((mobName, (x, y))) => 
-                    if (x >= 0 && x <= 460) {
-                      //Logger.info(s"${player.name} - Turn right to center $mobName.")
-                      Wow.pressAndReleaseKeystroke(Keys.Left)
-                    } else if ((x >= 500 && x <= 960)) {
-                      //Logger.info(s"${player.name} - Turn left to center $mobName.")
-                      Wow.pressAndReleaseKeystroke(Keys.Right)
-                    } else {
-                      //Logger.info(s"${player.name} - $mobName is centered.")
-                    }
-                  case _ => //Logger.info(s"1t${player.name} - Found no priority mob.")
-                }
-              }
-            }
-          }
+        Future {
+          
         }
-        /*implicit val mavang = team.getPlayer(DpsTwo)
-        val (width, height) = Wow.getWindowSize
-
-        if (Wow.isSlave) {
-          Logger.info("Looking for Monria...")
-          val screenshot = Wow.capture(
-            widthOpt = Some(width),
-            heightOpt = Some(height),
-            columnOpt = Some(0),
-            rowOpt = Some(0)
-          )
-1t
-          val monriaPositionOpt = findMonria(0, 0, width, height, screenshot)
-          
-          monriaPositionOpt match {
-            case Some((x, y)) =>
-              if (x >= 0 && x <= 460) {
-                Logger.info("Turn right to center Monria.")
-                Wow.pressAndReleaseKeystroke(Keys.Left)
-              } else if ((x >= 500 && x <= 960)) {
-                Logger.info("Turn left to center Monria.")
-                Wow.pressAndReleaseKeystroke(Keys.Right)
-              } else {
-                Logger.info("Monria is centered.")
-              }
-            case _ =>
-          }
-          
-          Logger.info(s"Monria is there: $monriaPositionOpt")1t
-        } else {
-          Logger.info("mavang not slave")
-        }*/
-        
-        Await.result(directPlayersFutures, Duration.Inf)
       }
       Thread.sleep(1000)
     }
@@ -351,51 +249,3 @@ object Main {
   }
 
 }
-
-/*
-
-val isInCombat = Try(
-  Wow.capture(
-    widthOpt = Some(1),
-    heightOpt = Some(1),
-    columnOpt = Some(4),
-    rowOpt = Some(1))) match {
-    case Success(pixel) =>
-      val color = Color(pixel.getRGB(0, 0))
-      val isInCombat = color.isRed
-      Logger.debug(
-        s"IsInCombat: $isInCombat - Colors are red: ${color.red} " +
-          s" - green: ${color.green} - blue: ${color.blue} ")
-
-      isInCombat
-    case Failure(e) =>
-      Logger.debug("Could not capture a screenshot of the window.", e)
-      false
-  }
-
-Try(
-  Wow.capture(
-    widthOpt = Some(1),
-    heightOpt = Some(1),
-    columnOpt = Some(1),
-    rowOpt = Some(1))) match {
-    case Success(pixel) =>
-      val color = pixel.getRGB(0, 0)
-      val red = (color & 0xff0000) / 65536
-      val green = (color & 0xff00) / 256
-      val blue = (color & 0xff)
-      val health = (red.toFloat / 255 * 100).round
-
-      Logger.debug(s"Health: $health - Colors are red: $red - green: $green - blue: $blue ")
-
-      if (isInCombat && health < 80) {
-        Logger.debug(s"Attacking target - health too low!")
-        Target.getDebuffRemainingTimeOpt(ShadowWordPain) match {
-          case Some(_) => Wow.pressAndReleaseKeystrokes(List(Keys.C))
-          case _ => Wow.pressAndReleaseKeystrokes(List(Keys.LShiftKey, Keys.F1))
-        }
-      }
-    case Failure(e) =>
-      Logger.debug("Could not capture a screenshot of the window.", e)
-  }
-*/
