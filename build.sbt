@@ -3,7 +3,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play" % "2.6.7",
   ws,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.21",
-  "net.java.dev.jna" % "jna" % "4.5.1" 
+  "net.java.dev.jna" % "jna" % "4.5.1",
+  "net.java.dev.jna" % "jna-platform" % "4.5.1" 
 )
 
 resolvers ++= Seq(
