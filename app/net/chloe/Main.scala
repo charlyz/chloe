@@ -47,6 +47,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent._
 import scala.concurrent.duration._
+import java.util.UUID
 
 object Main {
   
@@ -60,47 +61,45 @@ object Main {
     val players: Map[SpellTargetType, WowClass] = hWowWindows
       .flatMap { hWowWindow =>
         val title = Wow.getWindowTitleImpl(hWowWindow)
-        
+
         if (title.contains("Ditto")) {
           None
         } else if (title.contains("Rooke")) {
           val player = DruidResto(
             name = "Rooke",
             hWowWindow,
-            Healer,
-            Color(3547135)
+            Healer
           )
+          //println("asdfasdf")
+          //val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
+          //saveImage("bla"+UUID.randomUUID(), a)
           Some(Healer -> player)
         } else if (title.contains("Monria")) {
           val player = HunterBM(
             name = "Monria",
             hWowWindow,
-            DpsOne,
-            Color(16741174)
+            DpsOne
           )
           Some(DpsOne -> player)
         } else if (title.contains("Mavang")) {
           val player = HunterBM(
             name = "Mavang",
             hWowWindow,
-            DpsTwo,
-            Color(16725558)
+            DpsTwo
           )
           Some(DpsTwo -> player)
         } else if (title.contains("Maylva")) {
           val player = HunterBM(
             name = "Maylva",
             hWowWindow,
-            DpsThree,
-            Color(3604278)
+            DpsThree
           )
           Some(DpsThree -> player)
         } else if (title.contains("Cayla")) {
           val player = DruidGuardian(
             name = "Cayla",
             hWowWindow,
-            Tank,
-            Color(14235391)
+            Tank
           )
           Some(Tank -> player)
         } else {
@@ -185,12 +184,12 @@ object Main {
                     Wow.pressAndReleaseKeystroke(Keys.F7)
                     Wow.pressAndReleaseKeystrokes(List(Keys.LControlKey, Keys.U))
                   case NoScaling =>
-                    //player.executeNextAction
+                    player.executeNextAction
                 }
               }
             }
           }
-            
+            1
           Await.result(actionFutures, 5.seconds)
   
           Thread.sleep(Configuration.PauseBetweenActions.toMillis)

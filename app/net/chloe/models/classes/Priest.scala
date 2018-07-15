@@ -11,8 +11,7 @@ import play.Logger
 case class Priest(
   name: String,
   hWindow: HWND,
-  spellTargetType: SpellTargetType,
-  color: Color
+  spellTargetType: SpellTargetType
 ) extends WowClass {
   
   val spellAndTargetToKeys = Priest.spellAndTargetToKeys

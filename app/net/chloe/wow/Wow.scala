@@ -26,7 +26,7 @@ import scala.util.Random
 
 object Wow {
   
-  def pressAndReleaseKeystrokes(keys: List[Int])(implicit player: WowClass) = player.color.synchronized {
+  def pressAndReleaseKeystrokes(keys: List[Int])(implicit player: WowClass) = player.name.synchronized {
     keys.foreach { key =>
       User32.SendMessage(player.hWindow, 0x100, key, 0)
       Thread.sleep(50)

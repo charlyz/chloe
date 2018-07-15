@@ -24,7 +24,6 @@ trait WowClass {
   val spellTargetType: SpellTargetType
   
   val name: String
-  val color: Color
   val hWindow: HWND
   
   implicit val me = this

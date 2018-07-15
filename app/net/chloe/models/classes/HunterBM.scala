@@ -12,8 +12,7 @@ import play.Logger
 case class HunterBM(
   name: String,
   hWindow: HWND,
-  spellTargetType: SpellTargetType,
-  color: Color
+  spellTargetType: SpellTargetType
 ) extends WowClass {
   
   val spellAndTargetToKeys = HunterBM.spellAndTargetToKeys
