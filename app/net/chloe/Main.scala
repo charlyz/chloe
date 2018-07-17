@@ -79,17 +79,12 @@ object Main {
           // 140697018564608
           val baseAddress = Memory.getBaseAddress(hProcess)
           println("base address yo " + baseAddress)
-          val bytesToRead = 8 * 60
-          val playerNameMemory = Memory.readMemory(
-            hProcess.getPointer, 
-            baseAddress + 0x01C7ED80, 
-            bytesToRead
-          )
+
           //val a = playerNameMemory.getByteArray(0, 480)
-          println("tadam: " + playerNameMemory.getString(0))
+          println("tadam: " + Memory.readString(hProcess, baseAddress + 0x01C7ED80))
           //println("asdfasdf")
-          //val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
-          //saveImage("bla"+UUID.randomUUID(), a)
+          val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
+          saveImage("bla"+UUID.randomUUID(), a)
           Some(Healer -> player)
         } else if (title.contains("Monria")) {
           val player = HunterBM(

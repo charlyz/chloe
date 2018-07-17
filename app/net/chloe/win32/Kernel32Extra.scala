@@ -25,4 +25,5 @@ trait Kernel32Extra extends JnaKernel32 with StdCallLibrary {
   ): Boolean  
      
   def GetLastError(): Int
+  
 }

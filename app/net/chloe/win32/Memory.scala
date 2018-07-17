@@ -54,21 +54,23 @@ object Memory {
     Pointer.nativeValue(lpModuleInfo.EntryPoint)
   }
   
+  def readString(hProcess: HANDLE, address: Long) = {
+    Memory
+      .readMemory(
+        hProcess.getPointer, 
+        address, 
+        8 * 80
+      )
+      .getString(0)
+  }
     
   def getModuleInformation(hProcess: Pointer, hModule: Pointer) = {
-    classOf[LPMODULEINFO].getDeclaredFields.foreach { a =>
-      println(a.getName)
-    }
     val lpModInfo = new LPMODULEINFO()
-    println(s"Error: ${Native.getLastError()}")
-    println("size lpmodinfo " + lpModInfo.size())
-    val success = Psapi.GetModuleInformation(hProcess, hModule, lpModInfo, lpModInfo.size())
+
+    val isGetModuleInformationSucceeded = Psapi.GetModuleInformation(hProcess, hModule, lpModInfo, lpModInfo.size())
     
-    if (!success) {
-      println(lpModInfo.lpBaseOfDll)
-      println(lpModInfo.EntryPoint)
-      println(lpModInfo.SizeOfImage)
-        throw new Exception(s"GetModuleInformation failed. Error: ${Native.getLastError()}")
+    if (!isGetModuleInformationSucceeded) {
+      throw new Exception(s"GetModuleInformation failed. Error: ${Native.getLastError()}")
     }
     
     lpModInfo
