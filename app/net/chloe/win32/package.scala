@@ -20,6 +20,12 @@ package object win32 {
     .loadLibrary("gdi32", classOf[GDI32Extra], W32APIOptions.DEFAULT_OPTIONS)
     .asInstanceOf[GDI32Extra]
   
-  val Kernel32 = JnaKernel32.INSTANCE
+  val Kernel32 = Native
+    .loadLibrary("kernel32", classOf[Kernel32Extra], W32APIOptions.DEFAULT_OPTIONS)
+    .asInstanceOf[Kernel32Extra]
+  
+  val Psapi = Native
+    .loadLibrary("Psapi", classOf[PsapiExtra], W32APIOptions.DEFAULT_OPTIONS)
+    .asInstanceOf[PsapiExtra]
 
 }

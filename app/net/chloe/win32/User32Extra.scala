@@ -10,6 +10,7 @@ import com.sun.jna.platform.win32.WinNT
 import com.sun.jna.platform.win32.WinUser
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC
 import com.sun.jna.win32.StdCallLibrary
+import com.sun.jna.ptr._
 
 trait User32Extra extends JnaUser32 with StdCallLibrary with WinUser with WinNT {
   
@@ -24,5 +25,9 @@ trait User32Extra extends JnaUser32 with StdCallLibrary with WinUser with WinNT 
   def GetWindow(hWnd: HWND, uCmd: DWORD): HWND
 
   def SendMessage(hWnd: HWND, Msg: Int, wParam: Int, lParam: Int): Int
+  
+  def FindWindowA(winClass: String, title: String): Pointer
+  
+  def GetWindowThreadProcessId(hWnd: Pointer, lpdwProcessId: IntByReference): Int
 
 }
