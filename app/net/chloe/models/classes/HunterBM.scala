@@ -7,6 +7,7 @@ import net.chloe.wow._
 import net.chloe._
 import scala.collection.mutable.{ HashMap => MHashMap }
 import com.sun.jna.platform.win32.WinDef._
+import com.sun.jna.platform.win32.WinNT._
 import play.Logger
 
 case class HunterBM(

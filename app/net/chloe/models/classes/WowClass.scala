@@ -9,6 +9,19 @@ import com.sun.jna.platform.win32.WinDef._
 import net.chloe.models.classes._
 import net.chloe.wow._
 import play.Logger
+import com.sun.jna.platform.win32.WinUser.WNDENUMPROC
+import java.awt.image.BufferedImage
+import com.sun.jna.platform.win32.WinDef._
+import javax.imageio.ImageIO
+import scala.collection.mutable.ListBuffer
+import java.io._
+import java.awt.image._
+import javax.imageio._
+import net.chloe.models._
+import com.sun.jna.platform.win32.BaseTSD._
+import scala.util._
+import com.sun.jna.platform.win32.WinNT.HANDLE
+import net.chloe.win32._
 
 trait WowClass {
   
@@ -25,6 +38,10 @@ trait WowClass {
   
   val name: String
   val hWindow: HWND
+  
+  val processId = Memory.getProcessIdFromWindowHandle(hWindow)
+  val hProcess = Kernel32.OpenProcess(Memory.PROCESS_ALL_ACCESS, false, processId)
+  val baseAddress = Memory.getBaseAddress(hProcess)
   
   implicit val me = this
   

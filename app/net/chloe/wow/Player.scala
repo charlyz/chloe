@@ -31,6 +31,10 @@ import org.joda.time._
 
 object Player {
   
+  def getUnitLocations(implicit player: WowClass) = {
+    
+  }
+  
   def getHealthPercentage(implicit player: WowClass) = {
     val color = Wow.captureColor(column = 1, row = 1)
     val health = color.getRedAsPercentage

@@ -54,6 +54,39 @@ object Memory {
     Pointer.nativeValue(lpModuleInfo.EntryPoint)
   }
   
+  def readPointer(hProcess: HANDLE, address: Long) = {
+    Memory
+      .readMemory(
+        hProcess.getPointer, 
+        address, 
+        8
+      )
+      .getPointer(0)
+  }
+  
+  def readGUID(hProcess: HANDLE, address: Long) = {
+    Memory
+      .readMemory(
+        hProcess.getPointer, 
+        address, 
+        16
+      )
+      .getByteArray(0, 16)
+      .map("%02x".format(_))
+      .mkString
+      .toUpperCase()
+  }
+  
+  def readFloat(hProcess: HANDLE, address: Long) = {
+    Memory
+      .readMemory(
+        hProcess.getPointer, 
+        address, 
+        4
+      )
+      .getFloat(0)
+  }
+  
   def readString(hProcess: HANDLE, address: Long) = {
     Memory
       .readMemory(
