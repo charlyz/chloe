@@ -78,7 +78,7 @@ object Main {
           val hProcess = Kernel32.OpenProcess(Memory.PROCESS_ALL_ACCESS, false, processId)
           val baseAddress = Memory.getBaseAddress(hProcess)
           println("base address yo " + baseAddress)
-          println("tadam: " + Memory.readString(hProcess, baseAddress + 0x2C62418))
+          println("tadam: " + Memory.readString(hProcess, baseAddress + Configuration.Offsets.PlayerName))
           //println("asdfasdf")
           //val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
           //saveImage("bla"+UUID.randomUUID(), a)

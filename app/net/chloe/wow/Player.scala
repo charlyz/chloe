@@ -1,6 +1,5 @@
 package net.chloe.wow
 
-import com.sun.jna.Memory
 import com.sun.jna.platform.win32.WinDef.HWND
 import com.sun.jna.platform.win32.WinDef.RECT
 import com.sun.jna.platform.win32.WinGDI
@@ -28,13 +27,85 @@ import net.chloe.models.auras._
 import net.chloe.models.spells._
 import scala.concurrent.duration._
 import org.joda.time._
+import net.chloe.win32.Memory
+import net.chloe.win32.Implicits._
+import net.chloe.Configuration.Offsets
 
 object Player {
   
-  def getUnitLocations(implicit player: WowClass) = {
+  def getUnitLocations(
+    guidToPlayerName: Map[String, String],
+    unitLocations: Map[String, Location] = Map(),
+    nextEntryOpt: Option[Long] = None,
+    currentIteration: Int = 0,
+    previousEntries: Set[Long] = Set()
+  )(
+    implicit player: WowClass
+  ): Map[String, Location] = {
+    val hProcess = player.hProcess
+    val baseAddress = player.baseAddress
     
+    if (currentIteration > 20000) {
+      unitLocations
+    } else {
+      val nextEntry: Long = nextEntryOpt match {
+        case Some(foundNextEntry) => foundNextEntry
+        case _ => 
+          val entitiesListBase = Memory.readPointer(
+            hProcess, baseAddress + Offsets.EntitiesList.Base
+          )
+          
+          Memory.readPointer(hProcess, entitiesListBase + Offsets.EntitiesList.FirstEntry)
+      }
+      
+      if (previousEntries.contains(nextEntry)) {
+        unitLocations
+      } else {
+        val entryType = Memory.readInt(
+          hProcess, nextEntry + Offsets.EntitiesList.Entry.Type
+        )
+        
+        val descriptors: Long = Memory.readPointer(
+          hProcess, nextEntry + Offsets.EntitiesList.Entry.Descriptors
+        )
+        
+        val nextNextEntry: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NextEntry)
+        
+        if (descriptors > 0) {
+          
+          val locationOpt = entryType match {
+            case Configuration.ObjectTypes.LocalPlayer | Configuration.ObjectTypes.Player =>
+              val guid = Memory.readGUID(hProcess, nextEntry + Offsets.EntitiesList.Entry.GUID)
+              val x = Memory.readFloat(hProcess, nextEntry + Configuration.Offsets.EntitiesList.Unit.X)
+              val y = Memory.readFloat(hProcess, nextEntry + Configuration.Offsets.EntitiesList.Unit.Y)
+              val z = Memory.readFloat(hProcess, nextEntry + Configuration.Offsets.EntitiesList.Unit.Z)
+              val angle = Memory.readFloat(hProcess, nextEntry + Configuration.Offsets.EntitiesList.Unit.Angle)
+              
+              Some(Location(x, y, z, angle, guid))
+            case Configuration.ObjectTypes.NPC =>
+              
+          }
+          
+          getUnitLocations(
+            guidToPlayerName,
+            unitLocations,
+            Some(nextNextEntry),
+            currentIteration + 1,
+            previousEntries + nextEntry
+          )
+        } else {
+          getUnitLocations(
+            guidToPlayerName,
+            unitLocations,
+            Some(nextNextEntry),
+            currentIteration + 1,
+            previousEntries + nextEntry
+          )
+        }
+      }
+    }
   }
-  
+
   def getHealthPercentage(implicit player: WowClass) = {
     val color = Wow.captureColor(column = 1, row = 1)
     val health = color.getRedAsPercentage

@@ -24,15 +24,25 @@ object Configuration {
   
   object Offsets {
     val PlayerName = 0x2C62418
-
+    
+    object Camera {
+      val Base1 = 0x1BEE420
+      val Base2 = 0x3328
+      val Origin = 0x10
+      val MatrixX = 0x1C
+      val MatrixY = 0x28
+      val MatrixZ = 0x34
+      val Fov = 0x40
+    }
+    
     object EntitiesList {
-      val EntitiesListBase = 0x27FD798
+      val Base = 0x27FD798
       val FirstEntry = 0x18
       val NextEntry = 0x70
       
       object Entry {
         val Type = 0x20
-        val Descriptors = 0x10
+        val Descriptors = 0x08
         val GUID = 0x58
       }
       
@@ -44,8 +54,8 @@ object Configuration {
       }
       
       object NPC {
-        val Name1 = 0x0
-        val Name2 = 0x0
+        val Name1 = 0xC68
+        val Name2 = 0x080
       }
     }
     
