@@ -42,7 +42,7 @@ object Configuration {
       
       object Entry {
         val Type = 0x20
-        val Descriptors = 0x08
+        val Descriptors = 0x10
         val GUID = 0x58
       }
       
@@ -60,12 +60,12 @@ object Configuration {
     }
     
     object NamesCache {
-      val TableBase = 0x0
+      val Base = 0x1004C3C
       val NextEntry = 0x0
       
       object Entry {
-        val GUID = 0x0
-        val Name = 0x0
+        val GUID = 0x10
+        val Name = 0x21
       }
     }
   }

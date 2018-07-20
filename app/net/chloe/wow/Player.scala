@@ -30,11 +30,54 @@ import org.joda.time._
 import net.chloe.win32.Memory
 import net.chloe.win32.Implicits._
 import net.chloe.Configuration.Offsets
+import scala.collection.BitSet
 
 object Player {
   
+  def getUnitNameLookup(
+    guidToPlayerName: Map[String, String] = Map(),
+    nextEntryOpt: Option[Long] = None,
+    currentIteration: Int = 0,
+    previousEntries: Set[Long] = Set()
+  )(
+    implicit player: WowClass
+  ): Map[String, String] = {
+    val hProcess = player.hProcess
+    val baseAddress = player.baseAddress
+    
+    if (currentIteration > 1000) {
+      guidToPlayerName
+    } else {
+      val nextEntry: Long = nextEntryOpt match {
+        case Some(foundNextEntry) => foundNextEntry
+        case _ => 
+          Memory.readPointer(
+            hProcess, baseAddress + Offsets.NamesCache.Base
+          )
+      }
+      
+      if (previousEntries.contains(nextEntry)) {
+        guidToPlayerName
+      } else if (nextEntry <= 0 || nextEntry == Long.MaxValue) {
+        guidToPlayerName
+      } else {     
+        val nextNextEntry: Long = Memory.readPointer(hProcess, nextEntry + Offsets.NamesCache.NextEntry)
+ 
+        val guid = Memory.readGUID(hProcess, nextEntry + Offsets.NamesCache.Entry.GUID)
+        val name = Memory.readString(hProcess, nextEntry + Offsets.NamesCache.Entry.Name)
+        
+        getUnitNameLookup(
+          guidToPlayerName + (guid -> name),
+          Some(nextNextEntry),
+          currentIteration + 1,
+          previousEntries + nextEntry
+        )
+      }
+    }
+  }
+  
   def getUnitLocations(
-    guidToPlayerName: Map[String, String],
+    guidToPlayerName: Map[String, String] = Map(),
     unitLocations: Map[String, Location] = Map(),
     nextEntryOpt: Option[Long] = None,
     currentIteration: Int = 0,
@@ -48,47 +91,77 @@ object Player {
     if (currentIteration > 20000) {
       unitLocations
     } else {
+      val foundGUIDToPlayerName = if (guidToPlayerName.isEmpty) {
+        val a = getUnitNameLookup()
+        println("names " + a)
+        a
+      } else {
+        guidToPlayerName
+      }
+      
       val nextEntry: Long = nextEntryOpt match {
         case Some(foundNextEntry) => foundNextEntry
         case _ => 
           val entitiesListBase = Memory.readPointer(
             hProcess, baseAddress + Offsets.EntitiesList.Base
           )
-          
+
           Memory.readPointer(hProcess, entitiesListBase + Offsets.EntitiesList.FirstEntry)
       }
-      
+
       if (previousEntries.contains(nextEntry)) {
         unitLocations
+      } else if (nextEntry <= 0 || nextEntry == Long.MaxValue) {
+        unitLocations
       } else {
-        val entryType = Memory.readInt(
+        val entryType = Memory.readByte(
           hProcess, nextEntry + Offsets.EntitiesList.Entry.Type
         )
         
         val descriptors: Long = Memory.readPointer(
           hProcess, nextEntry + Offsets.EntitiesList.Entry.Descriptors
         )
-        
+        println(s"""
+          nextEntry: $nextEntry
+          entryType: $entryType
+          descriptors : $descriptors
+          """)
+          
         val nextNextEntry: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NextEntry)
         
-        if (descriptors > 0) {
-          
-          val locationOpt = entryType match {
-            case Configuration.ObjectTypes.LocalPlayer | Configuration.ObjectTypes.Player =>
+        if (descriptors > 0) {  
+          val newUnitLocations = entryType match {
+            case 
+              Configuration.ObjectTypes.LocalPlayer | 
+              Configuration.ObjectTypes.Player  | 
+              Configuration.ObjectTypes.NPC =>
+                
               val guid = Memory.readGUID(hProcess, nextEntry + Offsets.EntitiesList.Entry.GUID)
-              val x = Memory.readFloat(hProcess, nextEntry + Configuration.Offsets.EntitiesList.Unit.X)
-              val y = Memory.readFloat(hProcess, nextEntry + Configuration.Offsets.EntitiesList.Unit.Y)
-              val z = Memory.readFloat(hProcess, nextEntry + Configuration.Offsets.EntitiesList.Unit.Z)
-              val angle = Memory.readFloat(hProcess, nextEntry + Configuration.Offsets.EntitiesList.Unit.Angle)
+              val x = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.X)
+              val y = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Y)
+              val z = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Z)
+              val angle = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Angle)
               
-              Some(Location(x, y, z, angle, guid))
-            case Configuration.ObjectTypes.NPC =>
+              val name = if (entryType == Configuration.ObjectTypes.NPC) {
+                val npcName1: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NPC.Name1)
+                val npcName2: Long = Memory.readPointer(hProcess, npcName1 + Offsets.EntitiesList.NPC.Name2)
+                val a = Memory.readString(hProcess, npcName2)
+                println("NAME: " + a)
+                a
+              } else {
+                foundGUIDToPlayerName.get(guid) match {
+                  case Some(foundName) => foundName
+                  case _ => "unknown"
+                }
+              }
               
+              unitLocations + (name -> Location(x, y, z, angle, guid, name))
+            case  _ => unitLocations
           }
           
           getUnitLocations(
-            guidToPlayerName,
-            unitLocations,
+            foundGUIDToPlayerName,
+            newUnitLocations,
             Some(nextNextEntry),
             currentIteration + 1,
             previousEntries + nextEntry

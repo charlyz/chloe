@@ -79,6 +79,8 @@ object Main {
           val baseAddress = Memory.getBaseAddress(hProcess)
           println("base address yo " + baseAddress)
           println("tadam: " + Memory.readString(hProcess, baseAddress + Configuration.Offsets.PlayerName))
+          val locations = Player.getUnitLocations()(player)
+          println(locations)
           //println("asdfasdf")
           //val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
           //saveImage("bla"+UUID.randomUUID(), a)

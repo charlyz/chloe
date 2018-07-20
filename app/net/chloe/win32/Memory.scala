@@ -64,14 +64,24 @@ object Memory {
       .getPointer(0)
   }
   
-  def readInt(hProcess: HANDLE, address: Long) = {
+  def readByte(hProcess: HANDLE, address: Long) = {
     Memory
       .readMemory(
         hProcess.getPointer, 
         address, 
-        4
+        1
       )
-      .getInt(0)
+      .getByte(0)
+  }
+  
+  def readLong(hProcess: HANDLE, address: Long) = {
+    Memory
+      .readMemory(
+        hProcess.getPointer, 
+        address, 
+        8
+      )
+      .getLong(0)
   }
   
   def readGUID(hProcess: HANDLE, address: Long) = {
@@ -81,7 +91,7 @@ object Memory {
         address, 
         16
       )
-      .getByteArray(0, 16)
+      .getByteArray(0, 8)
       .map("%02x".format(_))
       .mkString
       .toUpperCase()
