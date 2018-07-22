@@ -49,13 +49,15 @@ import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent._
 import scala.concurrent.duration._
 import java.util.UUID
+import akka.actor._
 
 object Main {
 
   @volatile var combatRotationRunning = false
-  @volatile var directionBotRunning = false
+  @volatile var autoFacingBotRunning = false
   
   @volatile var stop = false
+  @volatile var unitNameToLocation: Map[String, Location] = _
 
   def main(args: Array[String]) = {
     val hWowWindows = Wow.getWindows("Ultimate")
@@ -78,7 +80,7 @@ object Main {
           val hProcess = Kernel32.OpenProcess(Memory.PROCESS_ALL_ACCESS, false, processId)
           val baseAddress = Memory.getBaseAddress(hProcess)
           println("base address yo " + baseAddress)
-          println("tadam: " + Memory.readString(hProcess, baseAddress + Configuration.Offsets.PlayerName))
+          //println("tadam: " + Memory.readStringOpt(hProcess, baseAddress + Configuration.Offsets.PlayerName))
           val locations = Player.getUnitLocations()(player)
           println(locations)
           //println("asdfasdf")
@@ -122,14 +124,32 @@ object Main {
     implicit val team = Team(players)
 
     if (team.players.size == 5) {
+      val healer = team.getPlayer(Healer)
+      refreshUnitLocationsForever(healer)
       hookStartStop()
-      Await.result(Future.sequence(List(startDirectionBot, startRotationBot)), Duration.Inf)
+      Await.result(Future.sequence(List(startAutoFacingBot, startRotationBot)), Duration.Inf)
       ()
     } else {
       Logger.info("Team not found.")
     }
   }
 
+  def refreshUnitLocationsForever(implicit player: WowClass) = {
+    val actorSystem = ActorSystem()
+    val scheduler = actorSystem.scheduler
+    val task = new Runnable { 
+      def run() { 
+        unitNameToLocation = Player.getUnitLocations()
+      } 
+    }
+
+    scheduler.schedule(
+      initialDelay = 1.second,
+      interval = 100.millis,
+      runnable = task
+    )
+  }
+  
   def hookStartStop() = {
     Future {
       blocking {
@@ -144,8 +164,8 @@ object Main {
                     combatRotationRunning = !combatRotationRunning
                     Logger.info(s"Combat rotation running: $combatRotationRunning")
                   } else if (info.vkCode == Keys.T) {
-                    directionBotRunning = !directionBotRunning
-                    Logger.info(s"Direction bot running: $directionBotRunning")
+                    autoFacingBotRunning = !autoFacingBotRunning
+                    Logger.info(s"Auto-facing bot running: $autoFacingBotRunning")
                   }
                 case _ =>
               }
@@ -162,14 +182,104 @@ object Main {
     }
   }
 
-  def startDirectionBot(implicit team: Team) = Future {
+  def startAutoFacingBot(implicit team: Team) = Future {
     while (!stop) {
-      if (directionBotRunning) {
-        Future {
+      if (autoFacingBotRunning) {
+        Try {
+          val healer = team.getPlayer(Healer)
+          val autoFacingFutures = Future.traverse(team.players) {
+            case (spellTargetType, player) =>
+              implicit val implicitPlayer = player
+              
+              if (player.spellTargetType == Healer) {
+                Future.successful(())
+              } else {
+                Future {
+                  blocking {
+                    val healerLocation = unitNameToLocation(healer.name)
+                    val playerLocation = unitNameToLocation(player.name)
+                    
+                    /*val directionX = -Math.sin(playerLocation.angle)
+                    val directionY = Math.cos(playerLocation.angle)
+                    val objectOffsetX = healerLocation.x - playerLocation.x
+                    val objectOffsetY = healerLocation.y - playerLocation.y
+                    val dot = (directionX * objectOffsetX) + (directionY * objectOffsetY)
+                    val directionLength = Math.sqrt(Math.pow(directionX, 2) + Math.pow(directionY, 2))
+                    val objectLength = Math.sqrt(Math.pow(objectOffsetX, 2) + Math.pow(objectOffsetY, 2))
+                    val denominator = directionLength * objectLength
+                    val angleToFaceObject = Math.acos(dot / denominator)
+                    */
+                    
+                    val diffX = healerLocation.x - playerLocation.x
+                    val diffY = healerLocation.y - playerLocation.y
+                    val facingAngle = Math.atan2(diffY, diffX)
+                    
+                    val normalizedFacingAngle = if (facingAngle < 0) {
+                      facingAngle + Math.PI * 2
+                    } else if (facingAngle > Math.PI * 2) {
+                      facingAngle - Math.PI * 2
+                    } else {
+                      facingAngle
+                    }
+                    
+                    println("playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                    
+                    val (minFacingAngle, maxFacingAngle) = if (normalizedFacingAngle > playerLocation.angle) {
+                      (playerLocation.angle.toDouble, normalizedFacingAngle)
+                    } else {
+                      (normalizedFacingAngle, playerLocation.angle.toDouble)
+                    }
+                    
+                    val innerAngle = maxFacingAngle - minFacingAngle
+                    val outerAngle = (2 * Math.PI - maxFacingAngle) + minFacingAngle
+                    
+                    if ((playerLocation.angle - normalizedFacingAngle).abs < 0.5) {
+                      Future.successful(())
+                    } else {
+                      if (innerAngle < outerAngle) {
+                        val turnDuration = if (innerAngle > 3) {
+                          1.second
+                        } else if (innerAngle > 1) {
+                          50.milliseconds
+                        } else {
+                          10.milliseconds
+                        }
+                        
+                        if (normalizedFacingAngle < playerLocation.angle) {
+                          Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
+                        } else {
+                          Wow.pressAndReleaseKeystroke(Keys.Left, turnDuration)
+                        }
+                      } else {
+                        val turnDuration = if (outerAngle > 3) {
+                          1.second
+                        } else if (innerAngle > 1) {
+                          50.milliseconds
+                        } else {
+                          10.milliseconds
+                        }
+                        
+                        if (normalizedFacingAngle > playerLocation.angle) {
+                          Wow.pressAndReleaseKeystroke(Keys.Right)
+                        } else {
+                          Wow.pressAndReleaseKeystroke(Keys.Left)
+                        }
+                      }
+                    }  
+                  }
+                } 
+              }
+          }
+          Await.result(autoFacingFutures, 5.seconds)
 
+          Thread.sleep(200)
+        } match {
+          case Success(_) =>
+          case Failure(e) =>
+            Logger.error("Unexpected error", e)
+            Thread.sleep(1000)
         }
       }
-      Thread.sleep(1000)
     }
   }
 
@@ -201,7 +311,6 @@ object Main {
                 }
               }
           }
-          1
           Await.result(actionFutures, 5.seconds)
 
           Thread.sleep(Configuration.PauseBetweenActions.toMillis)

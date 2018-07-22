@@ -23,23 +23,29 @@ import net.chloe.models.Color
 import net.chloe.win32._
 import play.api.Logger
 import scala.util.Random
+import scala.concurrent.duration._
 
 object Wow {
   
-  def pressAndReleaseKeystrokes(keys: List[Int])(implicit player: WowClass) = player.name.synchronized {
+  def pressAndReleaseKeystrokes(
+    keys: List[Int],
+    duration: Duration = 50.millis
+  )(
+    implicit player: WowClass
+  ) = player.name.synchronized {
     keys.foreach { key =>
       User32.SendMessage(player.hWindow, 0x100, key, 0)
-      Thread.sleep(50)
+      Thread.sleep(duration.toMillis)
     }
     
     keys.reverse.foreach { key =>
       User32.SendMessage(player.hWindow, 0x101, key, 0)
-      Thread.sleep(50)
+      Thread.sleep(duration.toMillis)
     }    
   }
   
-  def pressAndReleaseKeystroke(key: Int)(implicit player: WowClass) = {
-    pressAndReleaseKeystrokes(List(key))   
+  def pressAndReleaseKeystroke(key: Int, duration: Duration = 50.millis)(implicit player: WowClass) = {
+    pressAndReleaseKeystrokes(List(key), duration)   
   }
   
   def getWindows(pattern: String): List[HWND] = {

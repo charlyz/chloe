@@ -64,10 +64,13 @@ object Player {
         val nextNextEntry: Long = Memory.readPointer(hProcess, nextEntry + Offsets.NamesCache.NextEntry)
  
         val guid = Memory.readGUID(hProcess, nextEntry + Offsets.NamesCache.Entry.GUID)
-        val name = Memory.readString(hProcess, nextEntry + Offsets.NamesCache.Entry.Name)
+        val newGUIDToPlayerName = Memory.readStringOpt(hProcess, nextEntry + Offsets.NamesCache.Entry.Name) match {
+          case Some(name) => guidToPlayerName + (guid -> name)
+          case _ => guidToPlayerName
+        }
         
         getUnitNameLookup(
-          guidToPlayerName + (guid -> name),
+          newGUIDToPlayerName,
           Some(nextNextEntry),
           currentIteration + 1,
           previousEntries + nextEntry
@@ -92,9 +95,7 @@ object Player {
       unitLocations
     } else {
       val foundGUIDToPlayerName = if (guidToPlayerName.isEmpty) {
-        val a = getUnitNameLookup()
-        println("names " + a)
-        a
+        getUnitNameLookup()
       } else {
         guidToPlayerName
       }
@@ -121,11 +122,6 @@ object Player {
         val descriptors: Long = Memory.readPointer(
           hProcess, nextEntry + Offsets.EntitiesList.Entry.Descriptors
         )
-        println(s"""
-          nextEntry: $nextEntry
-          entryType: $entryType
-          descriptors : $descriptors
-          """)
           
         val nextNextEntry: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NextEntry)
         
@@ -142,20 +138,19 @@ object Player {
               val z = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Z)
               val angle = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Angle)
               
-              val name = if (entryType == Configuration.ObjectTypes.NPC) {
+              val nameOpt = if (entryType == Configuration.ObjectTypes.NPC) {
                 val npcName1: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NPC.Name1)
                 val npcName2: Long = Memory.readPointer(hProcess, npcName1 + Offsets.EntitiesList.NPC.Name2)
-                val a = Memory.readString(hProcess, npcName2)
-                println("NAME: " + a)
-                a
+                Memory.readStringOpt(hProcess, npcName2)
               } else {
-                foundGUIDToPlayerName.get(guid) match {
-                  case Some(foundName) => foundName
-                  case _ => "unknown"
-                }
+                foundGUIDToPlayerName.get(guid)
               }
               
-              unitLocations + (name -> Location(x, y, z, angle, guid, name))
+              nameOpt match {
+                case Some(foundName) =>
+                  unitLocations + (foundName -> Location(x, y, z, angle, guid, foundName))
+                case _ => unitLocations
+              }
             case  _ => unitLocations
           }
           

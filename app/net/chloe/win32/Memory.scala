@@ -107,14 +107,16 @@ object Memory {
       .getFloat(0)
   }
   
-  def readString(hProcess: HANDLE, address: Long) = {
-    Memory
-      .readMemory(
-        hProcess.getPointer, 
-        address, 
-        8 * 80
-      )
-      .getString(0)
+  def readStringOpt(hProcess: HANDLE, address: Long) = {
+    Option(
+      Memory
+        .readMemory(
+          hProcess.getPointer, 
+          address, 
+          8 * 80
+        )
+        .getString(0)
+    )
   }
     
   def getModuleInformation(hProcess: Pointer, hModule: Pointer) = {

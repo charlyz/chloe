@@ -23,11 +23,11 @@ object Configuration {
   }
   
   object Offsets {
-    val PlayerName = 0x2C62418
+    //val PlayerName = 0x2C62418
     
     object Camera {
-      val Base1 = 0x1BEE420
-      val Base2 = 0x3328
+      val Base1 = 0x2B5B530
+      val Base2 = 0x3330
       val Origin = 0x10
       val MatrixX = 0x1C
       val MatrixY = 0x28
@@ -36,13 +36,13 @@ object Configuration {
     }
     
     object EntitiesList {
-      val Base = 0x27FD798
+      val Base = 0x27E07B8
       val FirstEntry = 0x18
       val NextEntry = 0x70
       
       object Entry {
         val Type = 0x20
-        val Descriptors = 0x10
+        val Descriptors = 0x08
         val GUID = 0x58
       }
       
@@ -50,7 +50,7 @@ object Configuration {
         val X = 0x1588
         val Y = 0x158C
         val Z = 0x1590
-        val Angle = 0x1592
+        val Angle = 0x1598
       }
       
       object NPC {
@@ -60,12 +60,12 @@ object Configuration {
     }
     
     object NamesCache {
-      val Base = 0x1004C3C
+      val Base = 0x23D9488
       val NextEntry = 0x0
       
       object Entry {
-        val GUID = 0x10
-        val Name = 0x21
+        val GUID = 0x20
+        val Name = 0x31
       }
     }
   }
