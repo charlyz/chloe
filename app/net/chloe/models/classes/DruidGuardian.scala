@@ -33,7 +33,7 @@ case class DruidGuardian(
     //println("areNameplatesOn " + Player.areNameplatesOn)
     //println("Player.canCast(Ironfur) " + Player.canCast(Ironfur))
     //println("!Player.getBuffRemainingTimeOpt(Ironfur).isDefined " + !Player.getBuffRemainingTimeOpt(Ironfur).isDefined)
-    println("Player.hasBuff(BearForm) " + Player.hasBuff(BearForm))
+    //println("Player.hasBuff(BearForm) " + Player.hasBuff(BearForm))
     
     if (!Player.hasBuff(BearForm) && Player.canCast(BearForm)) {
       sendAction(BearForm -> None)

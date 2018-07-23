@@ -107,6 +107,16 @@ object Memory {
       .getFloat(0)
   }
   
+  def readDouble(hProcess: HANDLE, address: Long) = {
+    Memory
+      .readMemory(
+        hProcess.getPointer, 
+        address, 
+        8
+      )
+      .getDouble(0)
+  }
+  
   def readStringOpt(hProcess: HANDLE, address: Long) = {
     Option(
       Memory

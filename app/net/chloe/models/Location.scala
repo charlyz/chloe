@@ -6,5 +6,6 @@ case class Location(
   val z: Float,
   val angle: Float,
   val guid: String,
-  val name: String
+  val name: String,
+  val targetNameOpt: Option[String]
 )

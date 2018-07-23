@@ -146,9 +146,21 @@ object Player {
                 foundGUIDToPlayerName.get(guid)
               }
               
+              val targetNameOpt = if (
+                entryType == Configuration.ObjectTypes.Player ||
+                entryType == Configuration.ObjectTypes.LocalPlayer
+              ) {
+                val targetGUID = Memory.readGUID(hProcess, nextEntry + Offsets.EntitiesList.Player.Target)
+                val a= foundGUIDToPlayerName.get(targetGUID)
+                //println("targetNameOpt " + a)
+                a
+              } else {
+                None
+              }
+              
               nameOpt match {
                 case Some(foundName) =>
-                  unitLocations + (foundName -> Location(x, y, z, angle, guid, foundName))
+                  unitLocations + (foundName -> Location(x, y, z, angle, guid, foundName, targetNameOpt))
                 case _ => unitLocations
               }
             case  _ => unitLocations

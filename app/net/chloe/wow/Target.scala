@@ -72,12 +72,9 @@ object Target {
     val now = new DateTime()
     team.lastInterrupt.synchronized {
       if ((now.getMillis - team.lastInterrupt.getMillis).millis < Configuration.MinimumTimeBetweenInterrupt) {
-        println("WAIT")
         false
       } else {
-        val a = isCastingAndSpellIsInterruptible
-        println("isCastingAndSpellIsInterruptible " + isCastingAndSpellIsInterruptible)
-        a
+        isCastingAndSpellIsInterruptible
       }
     }
   }

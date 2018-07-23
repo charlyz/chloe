@@ -25,6 +25,13 @@ object Configuration {
   object Offsets {
     //val PlayerName = 0x2C62418
     
+    object CTM {
+      val CurrentX = 0x277D7EC + 0x0C//0x277D748
+      val CurrentY = 0x277D7EC + 0x0C + 4//0x277D750
+      val CurrentZ = 0x277D7EC + 0x0C + 8//0x277D758
+      val Distance = 0x0277D7F8
+    }
+    
     object Camera {
       val Base1 = 0x2B5B530
       val Base2 = 0x3330
@@ -33,6 +40,7 @@ object Configuration {
       val MatrixY = 0x28
       val MatrixZ = 0x34
       val Fov = 0x40
+      
     }
     
     object EntitiesList {
@@ -56,6 +64,10 @@ object Configuration {
       object NPC {
         val Name1 = 0xC68
         val Name2 = 0x080
+      }
+      
+      object Player {
+        val Target = 0x4A10
       }
     }
     

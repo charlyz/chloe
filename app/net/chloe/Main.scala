@@ -50,14 +50,16 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import java.util.UUID
 import akka.actor._
+import scala.collection.mutable.{Map => MMap}
+import org.joda.time.{Duration => JodaDuration, _}
 
 object Main {
 
   @volatile var combatRotationRunning = false
   @volatile var autoFacingBotRunning = false
-  
+
   @volatile var stop = false
-  @volatile var unitNameToLocation: Map[String, Location] = _
+  val playerToLocationsLookup: MMap[WowClass, Map[String, Location]] = MMap()
 
   def main(args: Array[String]) = {
     val hWowWindows = Wow.getWindows("Ultimate")
@@ -86,34 +88,31 @@ object Main {
           //println("asdfasdf")
           //val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
           //saveImage("bla"+UUID.randomUUID(), a)
+
           Some(Healer -> player)
         } else if (title.contains("Monria")) {
           val player = HunterBM(
             name = "Monria",
             hWowWindow,
-            DpsOne
-          )
+            DpsOne)
           Some(DpsOne -> player)
         } else if (title.contains("Mavang")) {
           val player = HunterBM(
             name = "Mavang",
             hWowWindow,
-            DpsTwo
-          )
+            DpsTwo)
           Some(DpsTwo -> player)
         } else if (title.contains("Maylva")) {
           val player = HunterBM(
             name = "Maylva",
             hWowWindow,
-            DpsThree
-          )
+            DpsThree)
           Some(DpsThree -> player)
         } else if (title.contains("Cayla")) {
           val player = DruidGuardian(
             name = "Cayla",
             hWowWindow,
-            Tank
-          )
+            Tank)
           Some(Tank -> player)
         } else {
           None
@@ -124,8 +123,7 @@ object Main {
     implicit val team = Team(players)
 
     if (team.players.size == 5) {
-      val healer = team.getPlayer(Healer)
-      refreshUnitLocationsForever(healer)
+      //refreshUnitLocationsForever(team)
       hookStartStop()
       Await.result(Future.sequence(List(startAutoFacingBot, startRotationBot)), Duration.Inf)
       ()
@@ -134,22 +132,42 @@ object Main {
     }
   }
 
-  def refreshUnitLocationsForever(implicit player: WowClass) = {
+  def refreshUnitLocationsForever(team: Team): Unit = {
     val actorSystem = ActorSystem()
     val scheduler = actorSystem.scheduler
-    val task = new Runnable { 
-      def run() { 
-        unitNameToLocation = Player.getUnitLocations()
-      } 
-    }
 
-    scheduler.schedule(
-      initialDelay = 1.second,
-      interval = 100.millis,
-      runnable = task
-    )
+    /*val ctmCurrentX = Memory.readFloat(player.hProcess, player.baseAddress + Configuration.Offsets.CTM.CurrentX)
+    val ctmCurrentY = Memory.readFloat(player.hProcess, player.baseAddress + Configuration.Offsets.CTM.CurrentY)
+    val ctmCurrentZ = Memory.readFloat(player.hProcess, player.baseAddress + Configuration.Offsets.CTM.CurrentZ)
+    val distance = Memory.readFloat(player.hProcess, player.baseAddress + Configuration.Offsets.CTM.Distance)
+    println(s"""
+      ctm X: $ctmCurrentX
+      ctm Y: $ctmCurrentY
+      ctm Z: $ctmCurrentZ
+      distance: $distance
+      """)
+      */
+    val refreshFutures = Future.traverse(team.players) { case (_, player) =>
+      Future {
+        blocking {
+          val start = DateTime.now
+          implicit val implicitPlayer = player
+          val unitNameToLocation = Player.getUnitLocations()
+          playerToLocationsLookup.synchronized {
+            playerToLocationsLookup(player) = unitNameToLocation
+          }
+          println("get location for " + player.name + " in " + (DateTime.now.getMillis - start.getMillis) + " millis")
+        }
+      }
+    }
+    
+    Await.result(refreshFutures, 5.seconds)
+    
+    scheduler.scheduleOnce(25.millis) {
+      refreshUnitLocationsForever(team)
+    }
   }
-  
+
   def hookStartStop() = {
     Future {
       blocking {
@@ -162,6 +180,7 @@ object Main {
                 case WinUser.WM_KEYDOWN =>
                   if (info.vkCode == Keys.D1) {
                     combatRotationRunning = !combatRotationRunning
+                    //autoFacingBotRunning = !autoFacingBotRunning
                     Logger.info(s"Combat rotation running: $combatRotationRunning")
                   } else if (info.vkCode == Keys.T) {
                     autoFacingBotRunning = !autoFacingBotRunning
@@ -187,6 +206,7 @@ object Main {
       if (autoFacingBotRunning) {
         Try {
           val healer = team.getPlayer(Healer)
+
           val autoFacingFutures = Future.traverse(team.players) {
             case (spellTargetType, player) =>
               implicit val implicitPlayer = player
@@ -196,89 +216,84 @@ object Main {
               } else {
                 Future {
                   blocking {
-                    val healerLocation = unitNameToLocation(healer.name)
-                    val playerLocation = unitNameToLocation(player.name)
-                    
-                    /*val directionX = -Math.sin(playerLocation.angle)
-                    val directionY = Math.cos(playerLocation.angle)
-                    val objectOffsetX = healerLocation.x - playerLocation.x
-                    val objectOffsetY = healerLocation.y - playerLocation.y
-                    val dot = (directionX * objectOffsetX) + (directionY * objectOffsetY)
-                    val directionLength = Math.sqrt(Math.pow(directionX, 2) + Math.pow(directionY, 2))
-                    val objectLength = Math.sqrt(Math.pow(objectOffsetX, 2) + Math.pow(objectOffsetY, 2))
-                    val denominator = directionLength * objectLength
-                    val angleToFaceObject = Math.acos(dot / denominator)
-                    */
-                    
-                    val diffX = healerLocation.x - playerLocation.x
-                    val diffY = healerLocation.y - playerLocation.y
-                    val facingAngle = Math.atan2(diffY, diffX)
-                    
-                    val normalizedFacingAngle = if (facingAngle < 0) {
-                      facingAngle + Math.PI * 2
-                    } else if (facingAngle > Math.PI * 2) {
-                      facingAngle - Math.PI * 2
-                    } else {
-                      facingAngle
+                    val unitNameLocationForTarget = Player.getUnitLocations()
+              
+                    unitNameLocationForTarget.get(player.name) match {
+                      case Some(playerLocation) =>
+                        playerLocation.targetNameOpt match {
+                          //case Some(targetName) if player.name != targetName =>
+                          case _ =>
+                            unitNameLocationForTarget.get(healer.name/*targetName*/) match {
+                              case Some(targetLocation) =>
+                                val diffX = targetLocation.x - playerLocation.x
+                                val diffY = targetLocation.y - playerLocation.y
+                                val facingAngle = Math.atan2(diffY, diffX)
+
+                                val normalizedFacingAngle = if (facingAngle < 0) {
+                                  facingAngle + Math.PI * 2
+                                } else if (facingAngle > Math.PI * 2) {
+                                  facingAngle - Math.PI * 2
+                                } else {
+                                  facingAngle
+                                }
+
+                                
+                                val (minFacingAngle, maxFacingAngle) =
+                                  if (normalizedFacingAngle > playerLocation.angle) {
+                                    (playerLocation.angle.toDouble, normalizedFacingAngle)
+                                  } else {
+                                    (normalizedFacingAngle, playerLocation.angle.toDouble)
+                                  }
+
+                                val innerAngle = maxFacingAngle - minFacingAngle
+                                val outerAngle = (2 * Math.PI - maxFacingAngle) + minFacingAngle
+
+                                if ((playerLocation.angle - normalizedFacingAngle).abs < 0.6) {
+                                  Future.successful(())
+                                } else {
+                                  if (innerAngle < outerAngle) {
+                                    val turnDuration =  50.milliseconds
+
+                                    if (normalizedFacingAngle < playerLocation.angle) {
+                                      println("RIGHT1 - playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                                      Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
+                                    } else {
+                                      println("LEFT1 - playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                                      Wow.pressAndReleaseKeystroke(Keys.Left, turnDuration)
+                                    }
+                                  } else {
+                                    val turnDuration = 50.milliseconds
+
+                                    if (normalizedFacingAngle < playerLocation.angle) {
+                                      println("RIGHT2 - playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                                      Wow.pressAndReleaseKeystroke(Keys.Left)
+                                    } else {
+                                      println("LEFT12 - playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                                      Wow.pressAndReleaseKeystroke(Keys.Right)
+                                    }
+                                  }
+                                }
+                              case _ => Future.successful(())
+                            }
+                          case _ => Future.successful(())
+                        }
+                      case _ => Future.successful(())
                     }
-                    
-                    println("playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
-                    
-                    val (minFacingAngle, maxFacingAngle) = if (normalizedFacingAngle > playerLocation.angle) {
-                      (playerLocation.angle.toDouble, normalizedFacingAngle)
-                    } else {
-                      (normalizedFacingAngle, playerLocation.angle.toDouble)
-                    }
-                    
-                    val innerAngle = maxFacingAngle - minFacingAngle
-                    val outerAngle = (2 * Math.PI - maxFacingAngle) + minFacingAngle
-                    
-                    if ((playerLocation.angle - normalizedFacingAngle).abs < 0.5) {
-                      Future.successful(())
-                    } else {
-                      if (innerAngle < outerAngle) {
-                        val turnDuration = if (innerAngle > 3) {
-                          1.second
-                        } else if (innerAngle > 1) {
-                          50.milliseconds
-                        } else {
-                          10.milliseconds
-                        }
-                        
-                        if (normalizedFacingAngle < playerLocation.angle) {
-                          Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
-                        } else {
-                          Wow.pressAndReleaseKeystroke(Keys.Left, turnDuration)
-                        }
-                      } else {
-                        val turnDuration = if (outerAngle > 3) {
-                          1.second
-                        } else if (innerAngle > 1) {
-                          50.milliseconds
-                        } else {
-                          10.milliseconds
-                        }
-                        
-                        if (normalizedFacingAngle > playerLocation.angle) {
-                          Wow.pressAndReleaseKeystroke(Keys.Right)
-                        } else {
-                          Wow.pressAndReleaseKeystroke(Keys.Left)
-                        }
-                      }
-                    }  
                   }
-                } 
+                }
               }
           }
-          Await.result(autoFacingFutures, 5.seconds)
+          Await.result(autoFacingFutures, 10.seconds)
 
-          Thread.sleep(200)
+          Thread.sleep(50)
         } match {
           case Success(_) =>
           case Failure(e) =>
             Logger.error("Unexpected error", e)
             Thread.sleep(1000)
         }
+      } else {
+        Thread.sleep(100)
       }
     }
   }

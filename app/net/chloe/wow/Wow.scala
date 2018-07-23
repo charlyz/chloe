@@ -44,6 +44,14 @@ object Wow {
     }    
   }
   
+  def rightClick(
+    implicit player: WowClass
+  ) = player.name.synchronized {
+    //User32.SendMessage(player.hWindow, 0x0204, key, 0)
+    //Thread.sleep(50)
+    //User32.SendMessage(player.hWindow, 0x0205, key, 0)
+  }
+  
   def pressAndReleaseKeystroke(key: Int, duration: Duration = 50.millis)(implicit player: WowClass) = {
     pressAndReleaseKeystrokes(List(key), duration)   
   }
