@@ -67,7 +67,8 @@ object Configuration {
       }
       
       object Player {
-        val Target = 0x4A10
+        val Target1 = 0x10
+        val Target2 = 0x9C
       }
     }
     

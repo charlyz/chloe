@@ -205,13 +205,14 @@ object Main {
     while (!stop) {
       if (autoFacingBotRunning) {
         Try {
-          val healer = team.getPlayer(Healer)
-
           val autoFacingFutures = Future.traverse(team.players) {
             case (spellTargetType, player) =>
               implicit val implicitPlayer = player
               
-              if (player.spellTargetType == Healer) {
+              val (currentWindowWidth, _) = Wow.getWindowSize
+              
+              if (currentWindowWidth == Configuration.PrimaryWindowWith) {
+              //tif (player.name != "Cayla") {
                 Future.successful(())
               } else {
                 Future {
@@ -221,9 +222,8 @@ object Main {
                     unitNameLocationForTarget.get(player.name) match {
                       case Some(playerLocation) =>
                         playerLocation.targetNameOpt match {
-                          //case Some(targetName) if player.name != targetName =>
-                          case _ =>
-                            unitNameLocationForTarget.get(healer.name/*targetName*/) match {
+                          case Some(targetName) if player.name != targetName =>
+                            unitNameLocationForTarget.get(targetName) match {
                               case Some(targetLocation) =>
                                 val diffX = targetLocation.x - playerLocation.x
                                 val diffY = targetLocation.y - playerLocation.y
@@ -248,27 +248,27 @@ object Main {
                                 val innerAngle = maxFacingAngle - minFacingAngle
                                 val outerAngle = (2 * Math.PI - maxFacingAngle) + minFacingAngle
 
-                                if ((playerLocation.angle - normalizedFacingAngle).abs < 0.6) {
+                                if ((playerLocation.angle - normalizedFacingAngle).abs < 0.3) {
                                   Future.successful(())
                                 } else {
                                   if (innerAngle < outerAngle) {
                                     val turnDuration =  50.milliseconds
 
                                     if (normalizedFacingAngle < playerLocation.angle) {
-                                      println("RIGHT1 - playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                                      println(s"RIGHT1 ${player.name} ${targetName} - playerLocation " + playerLocation + " - targetLocation: " + targetLocation + " - ttarget angle " + normalizedFacingAngle)
                                       Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
                                     } else {
-                                      println("LEFT1 - playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                                      println(s"LEFT1 ${player.name} ${targetName} - playerLocation " + playerLocation + " - targetLocation: " + targetLocation + " - ttarget angle " + normalizedFacingAngle)
                                       Wow.pressAndReleaseKeystroke(Keys.Left, turnDuration)
                                     }
                                   } else {
                                     val turnDuration = 50.milliseconds
 
                                     if (normalizedFacingAngle < playerLocation.angle) {
-                                      println("RIGHT2 - playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                                      println(s"RIGHT2 ${player.name} ${targetName} - playerLocation " + playerLocation + " - targetLocation: " + targetLocation + " - ttarget angle " + normalizedFacingAngle)
                                       Wow.pressAndReleaseKeystroke(Keys.Left)
                                     } else {
-                                      println("LEFT12 - playerLocation.angle " + playerLocation.angle + " - ttarget angle " + normalizedFacingAngle)
+                                      println(s"LEFT12 ${player.name} ${targetName} - playerLocation " + playerLocation + " - targetLocation: " + targetLocation + " - ttarget angle " + normalizedFacingAngle)
                                       Wow.pressAndReleaseKeystroke(Keys.Right)
                                     }
                                   }

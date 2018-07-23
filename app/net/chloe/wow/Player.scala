@@ -150,17 +150,29 @@ object Player {
                 entryType == Configuration.ObjectTypes.Player ||
                 entryType == Configuration.ObjectTypes.LocalPlayer
               ) {
-                val targetGUID = Memory.readGUID(hProcess, nextEntry + Offsets.EntitiesList.Player.Target)
-                val a= foundGUIDToPlayerName.get(targetGUID)
-                //println("targetNameOpt " + a)
-                a
+                val targetBase: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.Player.Target1)
+                val targetGUID = Memory.readGUID(hProcess, targetBase + Offsets.EntitiesList.Player.Target2)
+                foundGUIDToPlayerName.get(targetGUID)
               } else {
                 None
               }
-              
+
               nameOpt match {
                 case Some(foundName) =>
-                  unitLocations + (foundName -> Location(x, y, z, angle, guid, foundName, targetNameOpt))
+                  val shouldAddLocation = unitLocations.get(foundName) match {
+                    case Some(existingUnitLocation) 
+                      if entryType == Configuration.ObjectTypes.Player ||
+                         entryType == Configuration.ObjectTypes.LocalPlayer =>
+                      true
+                    case None => true
+                    case _ => false
+                  }
+                  
+                  if (shouldAddLocation) {
+                    unitLocations + (foundName -> Location(x, y, z, angle, guid, foundName, targetNameOpt))
+                  } else {
+                    unitLocations
+                  }
                 case _ => unitLocations
               }
             case  _ => unitLocations
