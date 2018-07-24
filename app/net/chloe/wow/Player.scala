@@ -137,7 +137,7 @@ object Player {
               val y = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Y)
               val z = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Z)
               val angle = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Angle)
-              
+
               val nameOpt = if (entryType == Configuration.ObjectTypes.NPC) {
                 val npcName1: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NPC.Name1)
                 val npcName2: Long = Memory.readPointer(hProcess, npcName1 + Offsets.EntitiesList.NPC.Name2)
@@ -145,7 +145,7 @@ object Player {
               } else {
                 foundGUIDToPlayerName.get(guid)
               }
-              
+
               val targetNameOpt = if (
                 entryType == Configuration.ObjectTypes.Player ||
                 entryType == Configuration.ObjectTypes.LocalPlayer
@@ -175,7 +175,8 @@ object Player {
                   }
                 case _ => unitLocations
               }
-            case  _ => unitLocations
+            case _ => 
+              unitLocations
           }
           
           getUnitLocations(

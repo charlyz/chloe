@@ -28,11 +28,11 @@ import scala.util._
 import com.sun.jna.platform.win32.WinDef.HMODULE
 import com.sun.jna.platform.win32.WinDef.LRESULT
 import com.sun.jna.platform.win32.WinDef.WPARAM
-import com.sun.jna.platform.win32.WinDef.LPARAM
+import com.sun.jna.platform.win32.WinDef._
 import com.sun.jna.platform.win32.WinUser
 import com.sun.jna.platform.win32.WinUser.HHOOK
 import com.sun.jna.platform.win32.WinUser.KBDLLHOOKSTRUCT
-import com.sun.jna.platform.win32.WinUser.LowLevelKeyboardProc
+import com.sun.jna.platform.win32.WinUser._
 import com.sun.jna.platform.win32.WinUser.MSG
 import net.chloe.wow._
 import net.chloe.models.Color
@@ -124,7 +124,8 @@ object Main {
 
     if (team.players.size == 5) {
       //refreshUnitLocationsForever(team)
-      hookStartStop()
+      mouseHookStartStop()
+      keyboardHookStartStop()
       Await.result(Future.sequence(List(startAutoFacingBot, startRotationBot)), Duration.Inf)
       ()
     } else {
@@ -136,17 +137,6 @@ object Main {
     val actorSystem = ActorSystem()
     val scheduler = actorSystem.scheduler
 
-    /*val ctmCurrentX = Memory.readFloat(player.hProcess, player.baseAddress + Configuration.Offsets.CTM.CurrentX)
-    val ctmCurrentY = Memory.readFloat(player.hProcess, player.baseAddress + Configuration.Offsets.CTM.CurrentY)
-    val ctmCurrentZ = Memory.readFloat(player.hProcess, player.baseAddress + Configuration.Offsets.CTM.CurrentZ)
-    val distance = Memory.readFloat(player.hProcess, player.baseAddress + Configuration.Offsets.CTM.Distance)
-    println(s"""
-      ctm X: $ctmCurrentX
-      ctm Y: $ctmCurrentY
-      ctm Z: $ctmCurrentZ
-      distance: $distance
-      """)
-      */
     val refreshFutures = Future.traverse(team.players) { case (_, player) =>
       Future {
         blocking {
@@ -167,8 +157,34 @@ object Main {
       refreshUnitLocationsForever(team)
     }
   }
-
-  def hookStartStop() = {
+  
+  def mouseHookStartStop() = {
+    Future {
+      blocking {
+        var hhk: HHOOK = null
+        val hMod = Kernel32.GetModuleHandle(null)
+        val mouseHook = new LowLevelMouseProc() {
+          def callback(nCode: Int, wParam: WPARAM, info: MSLLHOOKSTRUCT): LRESULT = {
+            if (nCode >= 0) {
+              wParam.intValue() match {
+               case MouseActions.WM_LBUTTONDOWN =>
+                 println("Left button click at " + info.pt.x + ", " + info.pt.y);
+               case MouseActions.WM_LBUTTONUP =>
+                 println("Left button release.")
+               case _ =>
+              }  
+            }
+            User32.CallNextHookEx(hhk, nCode, wParam, info.getPointer)
+          } 
+        }
+        
+        hhk = User32.SetWindowsHookEx(WinUser.WH_MOUSE_LL, mouseHook, hMod, 0)
+        User32.GetMessage(new MSG(), null, 0, 0)
+      }
+    }
+  }
+  
+  def keyboardHookStartStop() = {
     Future {
       blocking {
         var hhk: HHOOK = null

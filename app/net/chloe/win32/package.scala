@@ -27,5 +27,9 @@ package object win32 {
   val Psapi = Native
     .loadLibrary("Psapi", classOf[PsapiExtra], W32APIOptions.DEFAULT_OPTIONS)
     .asInstanceOf[PsapiExtra]
-
+    
+  object MouseActions {
+    val WM_LBUTTONDOWN = 0x0201
+    val WM_LBUTTONUP = 0x0202
+  }
 }

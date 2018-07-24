@@ -64,6 +64,16 @@ object Memory {
       .getPointer(0)
   }
   
+  def readInt(hProcess: HANDLE, address: Long) = {
+    Memory
+      .readMemory(
+        hProcess.getPointer, 
+        address, 
+        4
+      )
+      .getInt(0)
+  }
+  
   def readByte(hProcess: HANDLE, address: Long) = {
     Memory
       .readMemory(
