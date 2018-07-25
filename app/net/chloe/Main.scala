@@ -94,25 +94,33 @@ object Main {
           val player = HunterBM(
             name = "Monria",
             hWowWindow,
-            DpsOne)
+            DpsOne
+          )
+          
           Some(DpsOne -> player)
         } else if (title.contains("Mavang")) {
           val player = HunterBM(
             name = "Mavang",
             hWowWindow,
-            DpsTwo)
+            DpsTwo
+          )
+          
           Some(DpsTwo -> player)
         } else if (title.contains("Maylva")) {
           val player = HunterBM(
             name = "Maylva",
             hWowWindow,
-            DpsThree)
+            DpsThree
+          )
+          
           Some(DpsThree -> player)
         } else if (title.contains("Cayla")) {
           val player = DruidGuardian(
             name = "Cayla",
             hWowWindow,
-            Tank)
+            Tank
+          )
+          
           Some(Tank -> player)
         } else {
           None
@@ -124,7 +132,7 @@ object Main {
 
     if (team.players.size == 5) {
       //refreshUnitLocationsForever(team)
-      mouseHookStartStop()
+      mouseHookStartStop(team)
       keyboardHookStartStop()
       Await.result(Future.sequence(List(startAutoFacingBot, startRotationBot)), Duration.Inf)
       ()
@@ -157,22 +165,21 @@ object Main {
       refreshUnitLocationsForever(team)
     }
   }
-  
-  def mouseHookStartStop() = {
+
+  def mouseHookStartStop(team: Team) = {
     Future {
       blocking {
         var hhk: HHOOK = null
         val hMod = Kernel32.GetModuleHandle(null)
+        var lastLeftClick = DateTime.now
+        @volatile var isMoving = false
         val mouseHook = new LowLevelMouseProc() {
           def callback(nCode: Int, wParam: WPARAM, info: MSLLHOOKSTRUCT): LRESULT = {
             if (nCode >= 0) {
               wParam.intValue() match {
-               case MouseActions.WM_LBUTTONDOWN =>
-                 println("Left button click at " + info.pt.x + ", " + info.pt.y);
-               case MouseActions.WM_LBUTTONUP =>
-                 println("Left button release.")
+               case MouseActions.WM_LBUTTONDOWN => Wow.clickToMoveSlaves(team)
                case _ =>
-              }  
+              }
             }
             User32.CallNextHookEx(hhk, nCode, wParam, info.getPointer)
           } 
@@ -224,10 +231,8 @@ object Main {
           val autoFacingFutures = Future.traverse(team.players) {
             case (spellTargetType, player) =>
               implicit val implicitPlayer = player
-              
-              val (currentWindowWidth, _) = Wow.getWindowSize
-              
-              if (currentWindowWidth == Configuration.PrimaryWindowWith) {
+
+              if (Player.isPrimary) {
               //tif (player.name != "Cayla") {
                 Future.successful(())
               } else {

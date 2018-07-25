@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage
 
 import scala.collection.mutable.ListBuffer
 
-import com.sun.jna.Memory
+import com.sun.jna.{Memory => JnaMemory}
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.WinDef._
@@ -14,18 +14,35 @@ import com.sun.jna.platform.win32.WinDef.RECT
 import com.sun.jna.platform.win32.WinGDI
 import com.sun.jna.platform.win32.WinGDI.BITMAPINFO
 import com.sun.jna.platform.win32.WinUser._
+import com.sun.jna.platform.win32.WinNT._
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC
 import net.chloe.models.classes._
 import net.chloe._
 import net.chloe.Configuration
 import net.chloe.models._
 import net.chloe.models.Color
+import net.chloe.Matrix
 import net.chloe.win32._
 import play.api.Logger
 import scala.util.Random
 import scala.concurrent.duration._
+import org.joda.time.{ Duration => JodaDuration, _ }
+import java.util.concurrent.atomic.AtomicBoolean
+import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent._
+import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR
+import net.chloe.win32.Memory
+import net.chloe.Configuration.Offsets
+import net.chloe.win32.Implicits._
+import net.chloe.models.spells._
 
 object Wow {
+  
+  var lastLeftClick = DateTime.now
+  val isMoving = new AtomicBoolean(false)
+  
+  val WM_RBUTTONDOWN = 0x0204
+	val WM_RBUTTONUP = 0x0205
   
   def pressAndReleaseKeystrokes(
     keys: List[Int],
@@ -45,15 +62,152 @@ object Wow {
   }
   
   def rightClick(
+    x: Int,
+    y: Int
+  )(
     implicit player: WowClass
-  ) = player.name.synchronized {
-    //User32.SendMessage(player.hWindow, 0x0204, key, 0)
-    //Thread.sleep(50)
-    //User32.SendMessage(player.hWindow, 0x0205, key, 0)
+  ) = {
+    val rct = new RECT()
+
+    if (!User32.GetWindowRect(player.hWindow, rct))
+    {
+      throw new Exception("Could not get window size.")
+    }
+        
+    val newX = x// - rct.left
+    val newY = y// - rct.top
+        
+    User32.SendMessage(player.hWindow, WM_RBUTTONDOWN, 1, newY * 65536 + newX)
+    User32.SendMessage(player.hWindow, WM_RBUTTONUP, 0, newY * 65536 + newX)
   }
+  
   
   def pressAndReleaseKeystroke(key: Int, duration: Duration = 50.millis)(implicit player: WowClass) = {
     pressAndReleaseKeystrokes(List(key), duration)   
+  }
+  
+  def getPrimaryPlayer(team: Team) = {
+    val (_, primaryCharacter) = team.players
+      .find { case (_, player) =>
+        Player.isPrimary(player)
+      }
+      .getOrElse {
+        throw new Exception("Primary character not found.")
+      }
+      
+    primaryCharacter
+  }
+  
+  def getCameraMatrices(implicit player: WowClass) = {
+    val base1 = Memory.readPointer(player.hProcess, player.baseAddress + Offsets.Camera.Base1)
+    val base2 = Memory.readPointer(player.hProcess, base1 + Offsets.Camera.Base2)
+    
+    val xX = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixX)
+    val xY = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixX + 0x04)
+    val xZ = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixX + 0x08)
+    
+    val yX = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixY)
+    val yY = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixY + 0x04)
+    val yZ = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixY + 0x08)
+    
+    val zX = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixZ)
+    val zY = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixZ + 0x04)
+    val zZ = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.MatrixZ + 0x08)
+    
+    val originX = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.Origin)
+    val originY = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.Origin + 0x04)
+    val originZ = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.Origin + 0x08)
+    
+    val fov = Memory.readFloat(player.hProcess, base2 + Offsets.Camera.Fov)
+    
+    CameraMatrices(xX, xY, xZ, yX, yY, yZ, zX, zY, zZ, originX, originY, originZ, fov)
+  }
+  
+  def getWorldToScreenCoordinates(targetX: Float, targetY: Float, targetZ: Float)(implicit player: WowClass) = {
+    val unitLocations = Player.getUnitLocations()
+    
+    unitLocations.get(player.name) match {
+      case Some(playerLocation) =>
+        val rec = new RECT()
+        
+        if (!User32.GetWindowRect(player.hWindow, rec)) {
+          throw new Exception("Could not get the window size")
+        }
+        
+        val windowWidth = rec.right - rec.left
+        val windowHeight = rec.bottom - rec.top
+
+        //val offsetWidth = rec.left
+        //val offsetHeight = rec.top
+
+        val ar = windowWidth / windowHeight
+        val fovX = 2 * Math.atan(0.27 * ar).toFloat
+        val fovY = 0.5f
+        
+        val centerX = windowWidth * 0.5f
+        val centerY = windowHeight * 0.5f
+        
+        val cameraMatrices = getCameraMatrices
+        println(cameraMatrices)
+        val positionX = targetX - cameraMatrices.originX
+        val positionY = targetY - cameraMatrices.originY
+        val positionZ = targetZ - cameraMatrices.originZ
+        
+        val transformX = positionX * cameraMatrices.yX + positionY * cameraMatrices.yY + positionZ * cameraMatrices.yZ
+        val transformY = positionX * cameraMatrices.zX + positionY * cameraMatrices.zY + positionZ * cameraMatrices.zZ
+        val transformZ = positionX * cameraMatrices.xX + positionY * cameraMatrices.xY + positionZ * cameraMatrices.xZ
+        
+        val (outX, outY) = if (transformZ > 0.1) {
+          (
+            (1f - (transformX / fovX / transformZ)) * centerX,
+            (1f - (transformY / fovY / transformZ)) * centerY
+          )
+        } else {
+          (-1f, -1f)
+        }
+        
+        (
+          outX.toInt,//(outX + offsetWidth).toInt,
+          outY.toInt//(outY + offsetHeight).toInt
+        )
+      case _ => throw new Exception("Player location not found.")
+    }
+  }
+  
+  def clickToMoveSlaves(team: Team): Unit = {
+    Future {
+      blocking {
+        if (isMoving.compareAndSet(false, true)) {
+          val now = DateTime.now
+
+          if (now.getMillis - lastLeftClick.getMillis < 200) {
+            implicit val primaryPlayer = Wow.getPrimaryPlayer(team)
+            val (ctmX, ctmY, ctmZ) = Player.getCursorCoordinates
+            println("Target " + (ctmX, ctmY, ctmZ))
+            val ctmFuture = Future.traverse(team.players) { 
+              case (_, player) if player != primaryPlayer && player.spellTargetType == DpsOne =>
+                Future {
+                  blocking {
+                    Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.Add))(player)
+                    val (x, y) = getWorldToScreenCoordinates(ctmX, ctmY, ctmZ)(player)
+                    println(s"${player.name}: $x - $y")
+                    rightClick(1200, 1500)(player)
+                    Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.Add))(player)
+                  }
+                }
+              case _ => Future.successful(())
+            }
+            
+            Await.result(ctmFuture, 10.seconds)
+          }
+          
+          isMoving.set(false)
+          lastLeftClick = DateTime.now
+        } else {
+          ()
+        }
+      }
+    }
   }
   
   def getWindows(pattern: String): List[HWND] = {
@@ -173,7 +327,7 @@ object Wow {
       bmi.bmiHeader.biCompression = WinGDI.BI_RGB
       
       // We create an empty buffer.
-      val buffer = new Memory(width * height * 4)
+      val buffer = new JnaMemory(width * height * 4)
       // Fill it up with the bits from the bitmap handle
       // and assign the bitmap info to it.
       GDI32.GetDIBits(hdcTargetWindow, hBitmap, 0, height, buffer, bmi, WinGDI.DIB_RGB_COLORS);

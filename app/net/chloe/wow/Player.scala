@@ -79,6 +79,23 @@ object Player {
     }
   }
   
+  def getCursorCoordinates(implicit player: WowClass) = {
+    val hProcess = player.hProcess
+    val baseAddress = player.baseAddress
+    
+    val gameUIBase = Memory.readPointer(hProcess, baseAddress + Offsets.GameUI.Base)
+    val x = Memory.readFloat(hProcess, gameUIBase + Offsets.GameUI.CursorX)
+    val y = Memory.readFloat(hProcess, gameUIBase + Offsets.GameUI.CursorY)
+    val z = Memory.readFloat(hProcess, gameUIBase + Offsets.GameUI.CursorZ)
+    
+    (x, y, z)
+  }
+  
+  def isPrimary(implicit player: WowClass) = {
+    val (currentWindowWidth, _) = Wow.getWindowSize
+    currentWindowWidth == Configuration.PrimaryWindowWith
+  }
+  
   def getUnitLocations(
     guidToPlayerName: Map[String, String] = Map(),
     unitLocations: Map[String, Location] = Map(),

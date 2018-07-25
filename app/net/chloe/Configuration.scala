@@ -25,6 +25,13 @@ object Configuration {
   object Offsets {
     //val PlayerName = 0x2C62418
     
+    object GameUI {
+      val Base = 0x2B5B530
+      val CursorX = 0x288
+      val CursorY = 0x28C
+      val CursorZ = 0x290
+    }
+    
     object CTM {
       val CurrentX = 0x277D7EC + 0x0C//0x277D748
       val CurrentY = 0x277D7EC + 0x0C + 4//0x277D750
@@ -40,7 +47,6 @@ object Configuration {
       val MatrixY = 0x28
       val MatrixZ = 0x34
       val Fov = 0x40
-      
     }
     
     object EntitiesList {
