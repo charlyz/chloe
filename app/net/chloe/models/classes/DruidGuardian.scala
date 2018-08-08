@@ -38,7 +38,7 @@ case class DruidGuardian(
     if (!Player.hasBuff(BearForm) && Player.canCast(BearForm)) {
       sendAction(BearForm -> None)
     } else if (Player.isInCombat) {
-      val canCastBarkskin = Player.canCast(Barkskin)
+      val canCastBarkskin = Player.canCast(GuardianBarkskin)
       val canCastSurvivalInstincts = Player.canCast(SurvivalInstincts) && 
         !Player.getBuffRemainingTimeOpt(FrenziedRegeneration).isDefined
       val canCastIronfur = Player.canCast(Ironfur) && 
@@ -57,7 +57,7 @@ case class DruidGuardian(
         (canCastBarkskin || canCastSurvivalInstincts || canCastIronfur || canCastFrenziedRegeneration)
       ) {
         if (canCastBarkskin) {
-          sendAction(Barkskin -> None)
+          sendAction(GuardianBarkskin -> None)
         } else if (canCastSurvivalInstincts) {
           sendAction(SurvivalInstincts -> None)
         } else if (canCastIronfur) {
@@ -86,10 +86,10 @@ case class DruidGuardian(
       } else if (Player.canCast(Swipe)) {
         sendAction(Swipe -> None)
       } else {
-        Logger.debug(s"${me.name} - Executing no attack.")
+        //Logger.debug(s"${me.name} - Executing no attack.")
       }
     } else {
-      Logger.debug(s"${me.name} - Executing no attack.")
+      //Logger.debug(s"${me.name} - Executing no attack.")
     }
   }
   
@@ -103,14 +103,15 @@ object DruidGuardian {
     (Mangle, None) -> List(Keys.LShiftKey, Keys.D3),
     (Maul, None) -> List(Keys.LShiftKey, Keys.D4),
     (Swipe, None) -> List(Keys.LShiftKey, Keys.D5),
-    (RageOfTheSleeper, None) -> List(Keys.LShiftKey, Keys.D6),
+    //(RageOfTheSleeper, None) -> List(Keys.LShiftKey, Keys.D6),
     (SurvivalInstincts, None) -> List(Keys.LShiftKey, Keys.D7),
     (Ironfur, None) -> List(Keys.LShiftKey, Keys.D8),
     (FrenziedRegeneration, None) -> List(Keys.LShiftKey, Keys.D9),
     (SkullBash, None) -> List(Keys.LShiftKey, Keys.D0),
     (BearForm, None) -> List(Keys.LShiftKey, Keys.F1),
     (GuardianMoonfire,  None) -> List(Keys.LShiftKey, Keys.F2),
-    (Growl, None) -> List(Keys.LShiftKey, Keys.F3)
+    (Growl, None) -> List(Keys.LShiftKey, Keys.F3),
+    (GuardianBarkskin, None) -> List(Keys.Alt, Keys.H)
   )
 
 }

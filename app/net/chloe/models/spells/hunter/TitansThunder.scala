@@ -4,6 +4,7 @@ import net.chloe.models.spells._
 import net.chloe.models.auras._
 import scala.concurrent.duration._
 
+// Removed in BFA.
 case object TitansThunder extends Cooldown {
   val id = 207068
   val cooldownIndexInAddon = 10

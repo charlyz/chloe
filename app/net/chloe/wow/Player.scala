@@ -96,26 +96,140 @@ object Player {
     currentWindowWidth == Configuration.PrimaryWindowWith
   }
   
-  def getUnitLocations(
+  def getDistanceBetween2DPoints(
+    x1: Float, 
+    x2: Float, 
+    y1: Float, 
+    y2: Float
+  ) = {
+    Math.sqrt(
+      Math.pow((x1 - x2).abs, 2)
+      +
+      Math.pow((y1 - y2).abs, 2)
+    )
+  }
+  
+  def getDistanceBetween3DPoints(
+    x1: Float, 
+    x2: Float, 
+    y1: Float, 
+    y2: Float,
+    z1: Float,
+    z2: Float
+  ) = {
+    Math.sqrt(
+      Math.pow((x1 - x2).abs, 2)
+      +
+      Math.pow((y1 - y2).abs, 2)
+      +
+      Math.pow((z1 - z2).abs, 2)
+    )
+  }
+  
+  def findSafeSpot(
+    x: Float,
+    y: Float,
+    z: Float,
+    waypoints: Set[(Float, Float, Float)],
+    harmfulAoes: List[AreaTriggerEntity],
+    tries: Int = 0
+  )(
+    implicit player: WowClass
+  ): Option[(Float, Float)] = {
+    if (tries == 200000) {
+      None
+    } else {
+      waypoints.headOption match {
+        case Some((newX, newY, newZ)) =>
+          println((newX, newY, newZ) + " - " + waypoints.size)
+          val harmfulAoeOpt = harmfulAoes
+            .find { areaTriggerEntity => 
+              Player.isInAoe(x, y, areaTriggerEntity)(player)
+            }
+          println("harmfulAoeOpt " + harmfulAoeOpt)
+          harmfulAoeOpt match {
+            case Some(harmfulAoe) =>
+              val distanceToNewLocation = getDistanceBetween3DPoints(
+                x, 
+                newX, 
+                y, 
+                newY,
+                z,
+                newZ
+              )
+
+              val distanceToHarmfulAoe = getDistanceBetween3DPoints(
+                x, 
+                harmfulAoe.x, 
+                y, 
+                harmfulAoe.y,
+                z,
+                harmfulAoe.z
+              )
+
+              if (
+                harmfulAoe.radius + 1 < distanceToNewLocation && 
+                distanceToNewLocation < harmfulAoe.radius + 3
+              ) {
+                //println(s"d $distanceToNewLocation - harmfulAoe.radius ${harmfulAoe.radius}")
+                //println("found it " + Some(newX, newY))
+                println(s"${player.name} is in AOE ${harmfulAoe.id}")
+                Some(newX, newY)
+              } else {
+                findSafeSpot(x, y, z, waypoints.tail, harmfulAoes, tries + 1)
+              }  
+            case _ => None
+          }
+        case _ => None
+      }
+    }  
+  }
+  
+  def isInAoe(
+    playerEntity: PlayerEntity,
+    areaTriggerEntity: AreaTriggerEntity
+  )(
+    implicit player: WowClass
+  ): Boolean = {
+    isInAoe(playerEntity.x, playerEntity.y, areaTriggerEntity)
+  }
+  
+  def isInAoe(
+    x: Float,
+    y: Float,
+    areaTriggerEntity: AreaTriggerEntity
+  )(
+    implicit player: WowClass
+  ): Boolean = {
+    val d = getDistanceBetween2DPoints(x, areaTriggerEntity.x, y, areaTriggerEntity.y)
+    
+    d < areaTriggerEntity.radius
+  }
+  
+  def getEntities(
     guidToPlayerName: Map[String, String] = Map(),
-    unitLocations: Map[String, Location] = Map(),
+    nameToPlayerEntity: Map[String, PlayerEntity] = Map(),
+    areaTriggerEntities: List[AreaTriggerEntity] = List(),
+    guidToEntityLocation: Map[String, NPCEntity] = Map(),
     nextEntryOpt: Option[Long] = None,
     currentIteration: Int = 0,
     previousEntries: Set[Long] = Set()
   )(
     implicit player: WowClass
-  ): Map[String, Location] = {
+  ): (Map[String, PlayerEntity], List[AreaTriggerEntity], Map[String, NPCEntity]) = {
     val hProcess = player.hProcess
     val baseAddress = player.baseAddress
     
     if (currentIteration > 20000) {
-      unitLocations
+      (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
     } else {
       val foundGUIDToPlayerName = if (guidToPlayerName.isEmpty) {
         getUnitNameLookup()
       } else {
         guidToPlayerName
       }
+      
+      //println(foundGUIDToPlayerName)
       
       val nextEntry: Long = nextEntryOpt match {
         case Some(foundNextEntry) => foundNextEntry
@@ -128,9 +242,9 @@ object Player {
       }
 
       if (previousEntries.contains(nextEntry)) {
-        unitLocations
+        (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
       } else if (nextEntry <= 0 || nextEntry == Long.MaxValue) {
-        unitLocations
+        (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
       } else {
         val entryType = Memory.readByte(
           hProcess, nextEntry + Offsets.EntitiesList.Entry.Type
@@ -143,17 +257,45 @@ object Player {
         val nextNextEntry: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NextEntry)
         
         if (descriptors > 0) {  
-          val newUnitLocations = entryType match {
-            case 
-              Configuration.ObjectTypes.LocalPlayer | 
-              Configuration.ObjectTypes.Player  | 
-              Configuration.ObjectTypes.NPC =>
-                
+          val (newNameToPlayerEntity, newAreaTriggerEntities, newGUIDToEntityLocation) = entryType match {
+            case Configuration.ObjectTypes.NPC =>
+              val xAddress = nextEntry + Offsets.EntitiesList.Unit.X
+              val yAddress = nextEntry + Offsets.EntitiesList.Unit.Y
+              val zAddress = nextEntry + Offsets.EntitiesList.Unit.Z
+              val x = Memory.readFloat(hProcess, xAddress)
+              val y = Memory.readFloat(hProcess, yAddress)
+              val z = Memory.readFloat(hProcess, zAddress)
+              val npcName1: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NPC.Name1)
+              val npcName2: Long = Memory.readPointer(hProcess, npcName1 + Offsets.EntitiesList.NPC.Name2)
               val guid = Memory.readGUID(hProcess, nextEntry + Offsets.EntitiesList.Entry.GUID)
-              val x = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.X)
-              val y = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Y)
-              val z = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Z)
-              val angle = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.Unit.Angle)
+              //println("NPC: " + Memory.readStringOpt(hProcess, npcName2) + s" - x $x - y $y - z $z")
+              
+              (
+                nameToPlayerEntity,
+                areaTriggerEntities,
+                guidToEntityLocation + (guid -> NPCEntity(x, y, z, xAddress, yAddress, zAddress, guid))
+              )
+            case 
+              Configuration.ObjectTypes.LocalPlayer | Configuration.ObjectTypes.Player =>
+               /*var i = 0
+               while (i < 40000) {
+                val nextXp = Memory.readInt(hProcess, nextEntry + (i*4))
+                if (nextXp == 717000) {
+                  println(s"${player.name} nextXp $nextXp - i = $i")
+                }
+              
+                i = i+1
+              }*/
+
+              val guid = Memory.readGUID(hProcess, nextEntry + Offsets.EntitiesList.Entry.GUID)
+              val xAddress = nextEntry + Offsets.EntitiesList.Unit.X
+              val yAddress = nextEntry + Offsets.EntitiesList.Unit.Y
+              val zAddress = nextEntry + Offsets.EntitiesList.Unit.Z
+              val x = Memory.readFloat(hProcess, xAddress)
+              val y = Memory.readFloat(hProcess, yAddress)
+              val z = Memory.readFloat(hProcess, zAddress)
+              val angleAddress = nextEntry + Offsets.EntitiesList.Unit.Angle
+              val angle = Memory.readFloat(hProcess, angleAddress)
 
               val nameOpt = if (entryType == Configuration.ObjectTypes.NPC) {
                 val npcName1: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NPC.Name1)
@@ -162,22 +304,22 @@ object Player {
               } else {
                 foundGUIDToPlayerName.get(guid)
               }
-
-              val targetNameOpt = if (
+              
+              val (targetNameOpt, targetGUIDOpt) = if (
                 entryType == Configuration.ObjectTypes.Player ||
                 entryType == Configuration.ObjectTypes.LocalPlayer
               ) {
                 val targetBase: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.Player.Target1)
                 val targetGUID = Memory.readGUID(hProcess, targetBase + Offsets.EntitiesList.Player.Target2)
-                foundGUIDToPlayerName.get(targetGUID)
+                (foundGUIDToPlayerName.get(targetGUID), Some(targetGUID))
               } else {
-                None
+                (None, None)
               }
 
               nameOpt match {
                 case Some(foundName) =>
-                  val shouldAddLocation = unitLocations.get(foundName) match {
-                    case Some(existingUnitLocation) 
+                  val shouldAddPlayerEntity = nameToPlayerEntity.get(foundName) match {
+                    case Some(existingUnitPlayerEntity) 
                       if entryType == Configuration.ObjectTypes.Player ||
                          entryType == Configuration.ObjectTypes.LocalPlayer =>
                       true
@@ -185,28 +327,91 @@ object Player {
                     case _ => false
                   }
                   
-                  if (shouldAddLocation) {
-                    unitLocations + (foundName -> Location(x, y, z, angle, guid, foundName, targetNameOpt))
+                  if (shouldAddPlayerEntity) {
+                    val newPlayerEntity = PlayerEntity(
+                      x, 
+                      y, 
+                      z, 
+                      xAddress,
+                      yAddress,
+                      zAddress,
+                      angle, 
+                      angleAddress,
+                      guid, 
+                      foundName, 
+                      targetNameOpt, 
+                      targetGUIDOpt,
+                      nextEntry
+                    )
+                    (
+                      nameToPlayerEntity + (foundName -> newPlayerEntity),
+                      areaTriggerEntities, 
+                      guidToEntityLocation + (guid -> NPCEntity(x, y, z, xAddress, yAddress, zAddress, guid))
+                    )
                   } else {
-                    unitLocations
+                    (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
                   }
-                case _ => unitLocations
+                case _ => (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+              }
+            case 9 => 
+              println("found dynamic")
+              
+              (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+            case 11 => 
+              val spellIdX = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.AreaTrigger.X)
+              val spellIdY = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.AreaTrigger.Y)
+              val spellIdZ = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.AreaTrigger.Z)
+  
+              /* 
+               var i = 0
+               while (i < 200000) {
+                val spellId = Memory.readInt(hProcess, nextEntry + (i*4))
+                if (spellId == 187650 || spellId == 187651 ) {
+                  println(s"spellId $spellId - i = $i")
+                }
+              
+                i = i+1
+              }*/
+              
+              val spellId = Memory.readInt(
+                hProcess, nextEntry + Offsets.EntitiesList.AreaTrigger.Base +  Offsets.EntitiesList.AreaTrigger.SpellId
+              )
+              
+              val radius = Memory.readFloat(
+                hProcess, nextEntry + Offsets.EntitiesList.AreaTrigger.Base +  Offsets.EntitiesList.AreaTrigger.Radius
+              )
+              
+              println(s"spellId $spellId - radius $radius")
+              //println(s"spellIdX $spellIdX spellIdY $spellIdY spellIdZ $spellIdZ")
+              
+              if (Configuration.HarmfulAoes.contains(spellId)) {
+                (
+                  nameToPlayerEntity, 
+                  AreaTriggerEntity(spellId, radius, spellIdX, spellIdY, spellIdZ) +: areaTriggerEntities, 
+                  guidToEntityLocation
+                )
+              } else {
+                (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
               }
             case _ => 
-              unitLocations
+              (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
           }
           
-          getUnitLocations(
+          getEntities(
             foundGUIDToPlayerName,
-            newUnitLocations,
+            newNameToPlayerEntity,
+            newAreaTriggerEntities,
+            newGUIDToEntityLocation,
             Some(nextNextEntry),
             currentIteration + 1,
             previousEntries + nextEntry
           )
         } else {
-          getUnitLocations(
+          getEntities(
             guidToPlayerName,
-            unitLocations,
+            nameToPlayerEntity,
+            areaTriggerEntities,
+            guidToEntityLocation,
             Some(nextNextEntry),
             currentIteration + 1,
             previousEntries + nextEntry
@@ -356,6 +561,11 @@ object Player {
     color.red == 255 && color.blue == 255
   }
   
+  def isMovingFromMemory(playerEntity: PlayerEntity)(implicit player: WowClass) = {
+    val base = Memory.readPointer(player.hProcess, playerEntity.entryBase + Offsets.EntitiesList.Player.UnitSpeed1)
+    Memory.readFloat(player.hProcess, base + Offsets.EntitiesList.Player.UnitSpeed2) > 0
+  }
+  
   def isMounted(implicit player: WowClass) = {
     val color = Wow.captureColor(column = 1, row = 7)
     color.green == 255 && color.blue == 255
@@ -498,7 +708,7 @@ object Player {
   
   def hasDebuff(debuff: Debuff)(implicit player: WowClass) = {
     val color = Wow.captureColor(column = debuff.debuffIndexInAddon, row = 11)
-    
+    //println(s"red ${color.red} - blue ${color.blue} - green ${color.green}")
     color.red != 255 && color.blue != 255
   }
   

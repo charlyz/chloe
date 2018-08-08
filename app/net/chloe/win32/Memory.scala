@@ -20,7 +20,7 @@ import com.sun.jna.Native
 import com.sun.jna.platform.win32._
 import java.util.{ List => JList, ArrayList => JArrayList }
 import scala.collection.JavaConverters._
-
+import java.nio.ByteBuffer
 
 object Memory {
   
@@ -157,6 +157,29 @@ object Memory {
 
     Kernel32.ReadProcessMemory(process, address, output, bytesToRead, read)
     output
+  }
+  
+  def writeFloat(hProcess: HANDLE, address: Long, value: Float) = {
+    val buffer = ByteBuffer.allocate(8)
+    buffer.putFloat(value)
+
+    Memory
+      .writeMemory(
+        hProcess.getPointer, 
+        address,
+        buffer.putFloat(value).array
+      )
+  }
+  
+  def writeMemory(process: Pointer, address: Long, data: Array[Byte]) = {
+    val size = data.length
+    val toWrite = new JnaMemory(size)
+    
+    (0 until size).foreach { i =>
+      toWrite.setByte(i, data(i))
+    }
+    
+    Kernel32.WriteProcessMemory(process, address, toWrite, size, null)
   }
   
   

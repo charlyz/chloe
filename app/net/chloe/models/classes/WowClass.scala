@@ -15,6 +15,7 @@ import com.sun.jna.platform.win32.WinDef._
 import javax.imageio.ImageIO
 import scala.collection.mutable.ListBuffer
 import java.io._
+import java.util.concurrent.atomic.AtomicBoolean
 import java.awt.image._
 import javax.imageio._
 import net.chloe.models._
@@ -46,7 +47,7 @@ trait WowClass {
   implicit val me = this
   
   var lastSpellIdOpt: Option[Int] = None
-  
+
   def executeNextAction(implicit team: Team)
   
   def getSpellAndTargetBasedOnPriorityOpt(

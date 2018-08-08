@@ -10,4 +10,5 @@ trait Buff extends Aura {
 
 trait Debuff extends Aura {
   val debuffIndexInAddon: Int
+  val radiusOpt: Option[Float]
 }

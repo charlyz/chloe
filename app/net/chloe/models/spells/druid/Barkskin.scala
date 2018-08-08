@@ -4,12 +4,19 @@ import net.chloe.models.spells._
 import net.chloe.models.auras._
 import scala.concurrent.duration._
 
-case object Barkskin extends Cooldown with Buff {
+trait Barkskin extends Cooldown with Buff {
   val id = 22812
-  val cooldownIndexInAddon = 15
   val buffIndexInAddon = 9
   val hasCharges = false
   val needTarget = false
   val hasCooldownOtherThanGcd = true
   val isInstant = true
+}
+
+case object RestoBarkskin extends Barkskin {
+  val cooldownIndexInAddon = 15
+}
+
+case object GuardianBarkskin extends Barkskin {
+  val cooldownIndexInAddon = 14
 }

@@ -56,11 +56,11 @@ case class DruidResto(
       
       val isInCombat = Player.isInCombat(dpsOne)
      
-      val canCastBarkskin = Player.canCast(Barkskin)
+      val canCastBarkskin = Player.canCast(RestoBarkskin)
       val canCastTranquility = Player.canCast(Tranquility)
       val canCastSwiftmend = Player.canCast(Swiftmend)
       val canCastWildGrowth = Player.canCast(WildGrowth)
-      val canCastHealingTouch = Player.canCast(HealingTouch)
+      //val canCastHealingTouch = Player.canCast(HealingTouch)
       val canCastRenewal = Player.canCast(Renewal)
       
       if (
@@ -88,7 +88,7 @@ case class DruidResto(
         } else if (canCastSwiftmend) {
           sendAction(Swiftmend -> Some(Healer))
         } else if (canCastBarkskin) {
-          sendAction(Barkskin -> None)
+          sendAction(RestoBarkskin -> None)
         }
       } else if (
         dpsOneHealth >= 0 && 
@@ -159,10 +159,10 @@ case class DruidResto(
           spellAndTargetToPriority(Flourish -> None) += hotsCount
         }
          
-        if (canCastHealingTouch) {
-          spellAndTargetToPriority(HealingTouch -> Some(DpsOne)) += dpsOneHealthWeight
-          spellAndTargetToPriority(HealingTouch -> Some(Healer)) += healerHealthWeight
-        }
+        //if (canCastHealingTouch) {
+        //  spellAndTargetToPriority(HealingTouch -> Some(DpsOne)) += dpsOneHealthWeight
+        //  spellAndTargetToPriority(HealingTouch -> Some(Healer)) += healerHealthWeight
+        //}
         
         getSpellAndTargetBasedOnPriorityOpt(spellAndTargetToPriority.toMap) match {
           case Some(spellAndTarget) => sendAction(spellAndTarget)
@@ -219,11 +219,11 @@ case class DruidResto(
       
       val isInCombat = Player.isInCombat(tank)
      
-      val canCastBarkskin = Player.canCast(Barkskin)
+      val canCastBarkskin = Player.canCast(RestoBarkskin)
       val canCastTranquility = Player.canCast(Tranquility)
       val canCastSwiftmend = Player.canCast(Swiftmend)
       val canCastWildGrowth = Player.canCast(WildGrowth)
-      val canCastHealingTouch = Player.canCast(HealingTouch)
+      //val canCastHealingTouch = Player.canCast(HealingTouch)
       val canCastRenewal = Player.canCast(Renewal)
       val canCastIronbark = Player.canCast(Ironbark)
       
@@ -271,7 +271,7 @@ case class DruidResto(
         } else if (canCastSwiftmend) {
           sendAction(Swiftmend -> Some(Healer))
         } else if (canCastBarkskin) {
-          sendAction(Barkskin -> None)
+          sendAction(RestoBarkskin -> None)
         }
       } else if (
         dpsOneHealth > 0 && 
@@ -445,13 +445,13 @@ case class DruidResto(
           spellAndTargetToPriority(Flourish -> None) += hotsCount
         }
          
-        if (canCastHealingTouch) {
-          spellAndTargetToPriority(HealingTouch -> Some(DpsOne)) += dpsOneHealthWeight
-          spellAndTargetToPriority(HealingTouch -> Some(DpsTwo)) += dpsTwoHealthWeight
-          spellAndTargetToPriority(HealingTouch -> Some(DpsThree)) += dpsThreeHealthWeight
-          spellAndTargetToPriority(HealingTouch -> Some(Tank)) += tankHealthWeight
-          spellAndTargetToPriority(HealingTouch -> Some(Healer)) += healerHealthWeight
-        }
+        //if (canCastHealingTouch) {
+        //  spellAndTargetToPriority(HealingTouch -> Some(DpsOne)) += dpsOneHealthWeight
+        //  spellAndTargetToPriority(HealingTouch -> Some(DpsTwo)) += dpsTwoHealthWeight
+        //  spellAndTargetToPriority(HealingTouch -> Some(DpsThree)) += dpsThreeHealthWeight
+        //  spellAndTargetToPriority(HealingTouch -> Some(Tank)) += tankHealthWeight
+        //  spellAndTargetToPriority(HealingTouch -> Some(Healer)) += healerHealthWeight
+        //}
         
         getSpellAndTargetBasedOnPriorityOpt(spellAndTargetToPriority.toMap) match {
           case Some(spellAndTarget) => sendAction(spellAndTarget)
@@ -470,7 +470,7 @@ case class DruidResto(
 
         getSpellAndTargetBasedOnPriorityOpt(spellAndTargetToPriority.toMap) match {
           case Some(spellAndTarget) => sendAction(spellAndTarget)
-          case _ => Logger.debug(s"${me.name} - Executing no attack.")
+          case _ => //Logger.debug(s"${me.name} - Executing no attack.")
         }
       }
     }
@@ -483,7 +483,7 @@ object DruidResto {
   val spellAndTargetToKeys: Map[(Spell, Option[SpellTargetType]), List[Int]] = Map(
     (Rejuvenation, Some(Healer)) -> List(Keys.LShiftKey, Keys.D1),
     (Regrowth, Some(Healer)) -> List(Keys.LShiftKey, Keys.D2),
-    (HealingTouch, Some(Healer)) -> List(Keys.LShiftKey, Keys.D3),
+    //(HealingTouch, Some(Healer)) -> List(Keys.LShiftKey, Keys.D3),
     (Lifebloom, Some(Healer)) -> List(Keys.LShiftKey, Keys.D4),
     (Swiftmend, Some(Healer)) -> List(Keys.LShiftKey, Keys.D5),
     (Tranquility, None) -> List(Keys.LShiftKey, Keys.D6),
@@ -491,7 +491,7 @@ object DruidResto {
     (Innervate, Some(Healer)) -> List(Keys.LShiftKey, Keys.D8),
     (EssenceOfGHanir, None) -> List(Keys.LShiftKey, Keys.D9),
     (Efflorescence, Some(Healer)) -> List(Keys.LShiftKey, Keys.D0),
-    (Barkskin, None) -> List(Keys.LShiftKey, Keys.F1),
+    (RestoBarkskin, None) -> List(Keys.LShiftKey, Keys.F1),
     (Ironbark, Some(Healer)) -> List(Keys.LShiftKey, Keys.F2),
     (RestoMoonfire, None) -> List(Keys.LShiftKey, Keys.F3),
     (SolarWrath, None) -> List(Keys.LShiftKey, Keys.F4),
@@ -501,7 +501,7 @@ object DruidResto {
     
     (Rejuvenation, Some(DpsOne)) -> List(Keys.LControlKey, Keys.D1),
     (Regrowth, Some(DpsOne)) -> List(Keys.LControlKey, Keys.D2),
-    (HealingTouch, Some(DpsOne)) -> List(Keys.LControlKey, Keys.D3),
+    //(HealingTouch, Some(DpsOne)) -> List(Keys.LControlKey, Keys.D3),
     (Swiftmend, Some(DpsOne)) -> List(Keys.LControlKey, Keys.D4),
     (WildGrowth, Some(DpsOne)) -> List(Keys.LControlKey, Keys.D5),
     (Efflorescence, Some(DpsOne)) -> List(Keys.LControlKey, Keys.D6),
@@ -509,7 +509,7 @@ object DruidResto {
     
     (Rejuvenation, Some(DpsTwo)) -> List(Keys.LControlKey, Keys.F1),
     (Regrowth, Some(DpsTwo)) -> List(Keys.LControlKey, Keys.F2),
-    (HealingTouch, Some(DpsTwo)) -> List(Keys.LControlKey, Keys.F3),
+    //(HealingTouch, Some(DpsTwo)) -> List(Keys.LControlKey, Keys.F3),
     (Swiftmend, Some(DpsTwo)) -> List(Keys.LControlKey, Keys.F4),
     (WildGrowth, Some(DpsTwo)) -> List(Keys.LControlKey, Keys.F5),
     (Efflorescence, Some(DpsTwo)) -> List(Keys.LControlKey, Keys.F6),
@@ -517,7 +517,7 @@ object DruidResto {
     
     (Rejuvenation, Some(DpsThree)) -> List(Keys.Alt, Keys.F1),
     (Regrowth, Some(DpsThree)) -> List(Keys.Alt, Keys.F2),
-    (HealingTouch, Some(DpsThree)) -> List(Keys.Alt, Keys.F3),
+    //(HealingTouch, Some(DpsThree)) -> List(Keys.Alt, Keys.F3),
     (Swiftmend, Some(DpsThree)) -> List(Keys.Alt, Keys.F8),
     (WildGrowth, Some(DpsThree)) -> List(Keys.Alt, Keys.F5),
     (Efflorescence, Some(DpsThree)) -> List(Keys.Alt, Keys.F6),
@@ -525,7 +525,7 @@ object DruidResto {
     
     (Rejuvenation, Some(Tank)) -> List(Keys.Alt, Keys.D1),
     (Regrowth, Some(Tank)) -> List(Keys.Alt, Keys.D2),
-    (HealingTouch, Some(Tank)) -> List(Keys.Alt, Keys.D3),
+    //(HealingTouch, Some(Tank)) -> List(Keys.Alt, Keys.D3),
     (Lifebloom, Some(Tank)) -> List(Keys.Alt, Keys.D4),
     (Swiftmend, Some(Tank)) -> List(Keys.Alt, Keys.D5),
     (WildGrowth, Some(Tank)) -> List(Keys.Alt, Keys.D6),

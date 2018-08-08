@@ -21,15 +21,35 @@ object Configuration {
     val Player = 6
     val LocalPlayer = 7
   }
+ 
+  object Aoes {
+    val FreezingTrap = 187651
+    val Flare = 132950
+    val TarTrap = 187699
+    val DancingBlade = 193233
+    val CracklingStorm = 198895
+  }
+  
+  val HarmfulAoes = List(
+    Aoes.FreezingTrap,
+    Aoes.Flare,
+    Aoes.TarTrap,
+    Aoes.DancingBlade,
+    Aoes.CracklingStorm
+  )
   
   object Offsets {
     //val PlayerName = 0x2C62418
     
+    object IsRunning {
+      
+    }
+    
     object GameUI {
-      val Base = 0x2B5B530
-      val CursorX = 0x288
-      val CursorY = 0x28C
-      val CursorZ = 0x290
+      val Base = 0x2B5F710 
+      val CursorX = 0x290
+      val CursorY = 0x294
+      val CursorZ = 0x298
     }
     
     object CTM {
@@ -40,7 +60,7 @@ object Configuration {
     }
     
     object Camera {
-      val Base1 = 0x2B5B530
+      val Base1 = 0x2B5F680
       val Base2 = 0x3330
       val Origin = 0x10
       val MatrixX = 0x1C
@@ -50,7 +70,7 @@ object Configuration {
     }
     
     object EntitiesList {
-      val Base = 0x27E07B8
+      val Base = 0x27E48F8
       val FirstEntry = 0x18
       val NextEntry = 0x70
       
@@ -58,6 +78,15 @@ object Configuration {
         val Type = 0x20
         val Descriptors = 0x08
         val GUID = 0x58
+      }
+      
+      object AreaTrigger {
+        val X = 0x1B0
+        val Y = 0x1B0 + 4
+        val Z = 0x1B0 + 8
+        val Base = 560 * 4
+        val SpellId = 29 * 4
+        val Radius = 32 * 4
       }
       
       object Unit {
@@ -68,18 +97,20 @@ object Configuration {
       }
       
       object NPC {
-        val Name1 = 0xC68
-        val Name2 = 0x080
+        val Name1 = 0x1740
+        val Name2 = 0xE0
       }
       
       object Player {
         val Target1 = 0x10
         val Target2 = 0x9C
+        val UnitSpeed1 = 0x198
+        val UnitSpeed2 = 0xA4  
       }
     }
     
     object NamesCache {
-      val Base = 0x23D9488
+      val Base = 0x23DD488
       val NextEntry = 0x0
       
       object Entry {

@@ -4,6 +4,7 @@ import net.chloe.models.spells._
 import net.chloe.models.auras._
 import scala.concurrent.duration._
 
+// Removed in BFA.
 case object HealingTouch extends Cooldown {
   val id = 5185
   val cooldownIndexInAddon = 3

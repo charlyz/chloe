@@ -21,7 +21,6 @@ import net.chloe._
 import net.chloe.Configuration
 import net.chloe.models._
 import net.chloe.models.Color
-import net.chloe.Matrix
 import net.chloe.win32._
 import play.api.Logger
 import scala.util.Random
@@ -35,15 +34,21 @@ import net.chloe.win32.Memory
 import net.chloe.Configuration.Offsets
 import net.chloe.win32.Implicits._
 import net.chloe.models.spells._
+import java.util.concurrent.ForkJoinPool
 
 object Wow {
   
   var lastLeftClick = DateTime.now
-  val isMoving = new AtomicBoolean(false)
+  val isCtmInProgress = new AtomicBoolean(false)
   
   val WM_RBUTTONDOWN = 0x0204
 	val WM_RBUTTONUP = 0x0205
+	val WM_MOUSEMOVE = 0x0200
+	val WM_SETCURSOR = 0x0020
+	val wordShift = 16;
   
+  val writingForkjoinPool = ExecutionContext.fromExecutor(new ForkJoinPool())
+    
   def pressAndReleaseKeystrokes(
     keys: List[Int],
     duration: Duration = 50.millis
@@ -74,11 +79,16 @@ object Wow {
       throw new Exception("Could not get window size.")
     }
         
-    val newX = x// - rct.left
-    val newY = y// - rct.top
-        
-    User32.SendMessage(player.hWindow, WM_RBUTTONDOWN, 1, newY * 65536 + newX)
-    User32.SendMessage(player.hWindow, WM_RBUTTONUP, 0, newY * 65536 + newX)
+    val newX = x - rct.left
+    val newY = y - rct.top
+    
+    println(s"newX $newX - newY $newY")
+    
+    val lParam = new LPARAM(newX | (newY << wordShift))
+
+    User32.PostMessage(player.hWindow, WM_MOUSEMOVE, new WPARAM(2), lParam)
+    User32.PostMessage(player.hWindow, WM_RBUTTONDOWN, new WPARAM(1), lParam)
+    User32.PostMessage(player.hWindow, WM_RBUTTONUP, new WPARAM(0), lParam)
   }
   
   
@@ -124,21 +134,34 @@ object Wow {
   }
   
   def getWorldToScreenCoordinates(targetX: Float, targetY: Float, targetZ: Float)(implicit player: WowClass) = {
-    val unitLocations = Player.getUnitLocations()
+    val (nameToPlayerEntity, _, _) = Player.getEntities()
     
-    unitLocations.get(player.name) match {
+    nameToPlayerEntity.get(player.name) match {
       case Some(playerLocation) =>
         val rec = new RECT()
         
         if (!User32.GetWindowRect(player.hWindow, rec)) {
-          throw new Exception("Could not get the window size")
+          throw new Exception("Could not get the window size.")
         }
         
+        val point = new POINT(0, 0)
+        
+        if (!User32.ClientToScreen(player.hWindow, point)) {
+          throw new Exception("Could not execute ClientToScreen.")
+        }
+        
+        rec.left = point.x
+        rec.top = point.y
+
         val windowWidth = rec.right - rec.left
         val windowHeight = rec.bottom - rec.top
+        
+        println(s"windowWidth $windowWidth - windowHeight $windowHeight")
 
-        //val offsetWidth = rec.left
-        //val offsetHeight = rec.top
+        val offsetWidth = rec.left
+        val offsetHeight = rec.top
+        
+        println(s"offsetWidth $offsetWidth - offsetHeight $offsetHeight")
 
         val ar = windowWidth / windowHeight
         val fovX = 2 * Math.atan(0.27 * ar).toFloat
@@ -148,7 +171,9 @@ object Wow {
         val centerY = windowHeight * 0.5f
         
         val cameraMatrices = getCameraMatrices
+        
         println(cameraMatrices)
+        
         val positionX = targetX - cameraMatrices.originX
         val positionY = targetY - cameraMatrices.originY
         val positionZ = targetZ - cameraMatrices.originZ
@@ -167,32 +192,98 @@ object Wow {
         }
         
         (
-          outX.toInt,//(outX + offsetWidth).toInt,
-          outY.toInt//(outY + offsetHeight).toInt
+          (outX + offsetWidth).toInt,
+          (outY + offsetHeight).toInt
         )
       case _ => throw new Exception("Player location not found.")
     }
   }
   
-  def clickToMoveSlaves(team: Team): Unit = {
+  def getOtherPlayerEntitiesToHide(
+    team: Team, 
+    playerName: String,  
+    playerNameToPlayerEntity: Map[String, PlayerEntity],
+    npcEntities: List[NPCEntity]
+  ): List[EntityLocation] = {
+   val playerEntities = team.players
+      .flatMap { case (_, player) =>
+        if (player.name == playerName) {
+          None
+        } else {
+          playerNameToPlayerEntity.get(player.name) match {
+            case Some(playerEntity) => Some(playerEntity)
+            case _ => None
+          }
+        }
+      }
+      .toList
+      
+    playerEntities ++ npcEntities
+  }
+  
+  def clickToMoveSlave(
+    ctmX: Float, 
+    ctmY: Float, 
+    ctmZ: Float,
+    team: Team
+  )(
+    implicit player: WowClass
+  ): Unit = {
+    //println("Target " + (ctmX, ctmY, ctmZ))
+    Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.Add))(player)
+    val (x, y) = getWorldToScreenCoordinates(ctmX, ctmY, ctmZ)(player)
+    println(s"${player.name} is going there: $x - $y")
+    
+    val (nameToPlayerEntity, _, guidToEntityLocation) = Player.getEntities()
+    nameToPlayerEntity.get(player.name) match {
+      case Some(playerEntity) => 
+        val otherEntitiesToHide = guidToEntityLocation.values.filter(_.guid != playerEntity.guid)
+        
+        @volatile var stopHiding = false
+        val hidingOtherPlayersFuture = Future {
+          blocking {
+            while (!stopHiding) {
+              otherEntitiesToHide.foreach { case otherEntityToHide =>
+                Memory.writeFloat(player.hProcess, otherEntityToHide.xAddress, 0f)
+              }
+              Thread.sleep(5)
+            }
+          }
+        }(writingForkjoinPool)
+        
+        rightClick(x, y)(player)
+        Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.Add))(player)
+        
+        stopHiding = true
+        Await.result(hidingOtherPlayersFuture, 10.seconds)
+      case _ =>
+    }
+  }
+  
+  def clickToMoveSlaves(
+    team: Team, 
+    xOpt: Option[Float] = None, 
+    yOpt: Option[Float] = None, 
+    zOpt: Option[Float] = None
+  ): Unit = {
     Future {
       blocking {
-        if (isMoving.compareAndSet(false, true)) {
+        if (isCtmInProgress.compareAndSet(false, true)) {
           val now = DateTime.now
-
-          if (now.getMillis - lastLeftClick.getMillis < 200) {
+          val shouldAutoFace = now.getMillis - lastLeftClick.getMillis < 200
+          lastLeftClick = DateTime.now
+          if (shouldAutoFace) {
             implicit val primaryPlayer = Wow.getPrimaryPlayer(team)
-            val (ctmX, ctmY, ctmZ) = Player.getCursorCoordinates
+            val (ctmX, ctmY, ctmZ) = (xOpt, yOpt, zOpt) match {
+              case (Some(x), Some(y), Some(z)) => (x, y, z)
+              case _ => Player.getCursorCoordinates
+            }
             println("Target " + (ctmX, ctmY, ctmZ))
             val ctmFuture = Future.traverse(team.players) { 
-              case (_, player) if player != primaryPlayer && player.spellTargetType == DpsOne =>
+              case (_, player) if player != primaryPlayer =>
                 Future {
                   blocking {
-                    Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.Add))(player)
-                    val (x, y) = getWorldToScreenCoordinates(ctmX, ctmY, ctmZ)(player)
-                    println(s"${player.name}: $x - $y")
-                    rightClick(1200, 1500)(player)
-                    Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.Add))(player)
+                    clickToMoveSlave(ctmX, ctmY, ctmZ, team)(player)
                   }
                 }
               case _ => Future.successful(())
@@ -201,8 +292,8 @@ object Wow {
             Await.result(ctmFuture, 10.seconds)
           }
           
-          isMoving.set(false)
-          lastLeftClick = DateTime.now
+          isCtmInProgress.set(false)
+
         } else {
           ()
         }

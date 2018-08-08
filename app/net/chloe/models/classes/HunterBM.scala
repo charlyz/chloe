@@ -63,12 +63,14 @@ case class HunterBM(
         }
       } else if (Target.canInterruptAsTeam) {
         sendAction(CounterShot -> None)
+      } else if (Player.canCast(PrimalRage)) {
+        sendAction(PrimalRage -> None)
       } else if (Player.canCast(BestialWrath)) {
         sendAction(BestialWrath -> None)
       } else if (Player.canCast(AspectOfTheWild)) {
         sendAction(AspectOfTheWild -> None)
-      } else if (Player.canCast(TitansThunder) && Player.getChargesCount(DireBeast) > 0) {
-        sendAction(TitansThunder -> None)
+      //} else if (Player.canCast(TitansThunder) && Player.getChargesCount(DireBeast) > 0) {
+      //  sendAction(TitansThunder -> None)
       } else if (Player.canCast(AMurderOfCrows)) {
         sendAction(AMurderOfCrows -> None)
       } else if (Player.canCast(DireBeast)) {
@@ -87,10 +89,10 @@ case class HunterBM(
       ) {
         sendAction(CobraShot -> None)
       } else {
-        Logger.debug(s"${me.name} - Executing no attack.")
+        //Logger.debug(s"${me.name} - Executing no attack.")
       }
     } else {
-      Logger.debug(s"${me.name} - Executing no attack.")
+      //Logger.debug(s"${me.name} - Executing no attack.")
     }
   }
   
@@ -108,9 +110,10 @@ object HunterBM {
     (Exhilaration, None) -> List(Keys.LShiftKey, Keys.D7),
     (AspectOfTheTurtle, None) -> List(Keys.LShiftKey, Keys.D8),
     (CounterShot, None) -> List(Keys.LShiftKey, Keys.D9),
-    (TitansThunder, None) -> List(Keys.LShiftKey, Keys.D0),
+    //(TitansThunder, None) -> List(Keys.LShiftKey, Keys.D0),
     (RevivePet, None) -> List(Keys.LShiftKey, Keys.F1),
-    (AMurderOfCrows, None) -> List(Keys.LShiftKey, Keys.F2)
+    (AMurderOfCrows, None) -> List(Keys.LShiftKey, Keys.F2),
+    (PrimalRage, None) -> List(Keys.Alt, Keys.F2)
   )
 
 }

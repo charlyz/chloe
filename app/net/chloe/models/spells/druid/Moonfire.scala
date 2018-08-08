@@ -11,6 +11,7 @@ trait Moonfire extends Cooldown with Debuff {
   val needTarget = true
   val hasCooldownOtherThanGcd = false
   val isInstant = true
+  val radiusOpt = None
 }
 
 case object RestoMoonfire extends Moonfire {

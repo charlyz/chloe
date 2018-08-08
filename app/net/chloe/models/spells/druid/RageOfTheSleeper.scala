@@ -4,6 +4,7 @@ import net.chloe.models.spells._
 import net.chloe.models.auras._
 import scala.concurrent.duration._
 
+// Removed in BFA.
 case object RageOfTheSleeper extends Cooldown with Buff {
   val id = 200851
   val cooldownIndexInAddon = 5

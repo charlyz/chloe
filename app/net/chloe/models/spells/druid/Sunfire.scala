@@ -12,4 +12,5 @@ case object Sunfire extends Cooldown with Debuff {
   val needTarget = true
   val hasCooldownOtherThanGcd = false
   val isInstant = true
+  val radiusOpt = None
 }

@@ -46,23 +46,36 @@ import net.chloe.models.Keys
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits._
+import java.util.concurrent.ForkJoinPool
 import scala.concurrent._
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import java.util.UUID
 import akka.actor._
 import scala.collection.mutable.{Map => MMap}
 import org.joda.time.{Duration => JodaDuration, _}
+import java.io._
+import net.chloe.models.spells.hov._
+import scala.io.Source
 
 object Main {
 
   @volatile var combatRotationRunning = false
   @volatile var autoFacingBotRunning = false
-
   @volatile var stop = false
-  val playerToLocationsLookup: MMap[WowClass, Map[String, Location]] = MMap()
-
+  val playerToLocationsLookup: MMap[WowClass, Map[String, PlayerEntity]] = MMap()
+  val write = new PrintWriter(new FileOutputStream(new File("waypoints.txt"), true))
+  
   def main(args: Array[String]) = {
     val hWowWindows = Wow.getWindows("Ultimate")
+    
+    val waypoints = Source.fromFile("conf/waypoints/hov.txt").getLines
+      .map { line =>
+        val splitLine = line.split(",")
+        (splitLine(0).toFloat, splitLine(1).toFloat, splitLine(2).toFloat)
+      }
+      .toSet
 
     val players: Map[SpellTargetType, WowClass] = hWowWindows
       .flatMap { hWowWindow =>
@@ -83,7 +96,7 @@ object Main {
           val baseAddress = Memory.getBaseAddress(hProcess)
           println("base address yo " + baseAddress)
           //println("tadam: " + Memory.readStringOpt(hProcess, baseAddress + Configuration.Offsets.PlayerName))
-          val locations = Player.getUnitLocations()(player)
+          val locations = Player.getEntities()(player)
           println(locations)
           //println("asdfasdf")
           //val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
@@ -134,7 +147,7 @@ object Main {
       //refreshUnitLocationsForever(team)
       mouseHookStartStop(team)
       keyboardHookStartStop()
-      Await.result(Future.sequence(List(startAutoFacingBot, startRotationBot)), Duration.Inf)
+      Await.result(Future.sequence(List(startAutoFacingBot(waypoints), startRotationBot)), Duration.Inf)
       ()
     } else {
       Logger.info("Team not found.")
@@ -150,7 +163,7 @@ object Main {
         blocking {
           val start = DateTime.now
           implicit val implicitPlayer = player
-          val unitNameToLocation = Player.getUnitLocations()
+          val (unitNameToLocation, _, _) = Player.getEntities()
           playerToLocationsLookup.synchronized {
             playerToLocationsLookup(player) = unitNameToLocation
           }
@@ -172,7 +185,6 @@ object Main {
         var hhk: HHOOK = null
         val hMod = Kernel32.GetModuleHandle(null)
         var lastLeftClick = DateTime.now
-        @volatile var isMoving = false
         val mouseHook = new LowLevelMouseProc() {
           def callback(nCode: Int, wParam: WPARAM, info: MSLLHOOKSTRUCT): LRESULT = {
             if (nCode >= 0) {
@@ -224,8 +236,8 @@ object Main {
     }
   }
 
-  def startAutoFacingBot(implicit team: Team) = Future {
-    while (!stop) {
+  def startAutoFacingBot(waypoints: Set[(Float, Float, Float)])(implicit team: Team) = Future {
+    while (!stop) { 
       if (autoFacingBotRunning) {
         Try {
           val autoFacingFutures = Future.traverse(team.players) {
@@ -233,80 +245,157 @@ object Main {
               implicit val implicitPlayer = player
 
               if (Player.isPrimary) {
-              //tif (player.name != "Cayla") {
-                Future.successful(())
+              //if (player.name != "Cayla") {
+                Future.successful(true)
               } else {
                 Future {
                   blocking {
-                    val unitNameLocationForTarget = Player.getUnitLocations()
-              
-                    unitNameLocationForTarget.get(player.name) match {
-                      case Some(playerLocation) =>
-                        playerLocation.targetNameOpt match {
-                          case Some(targetName) if player.name != targetName =>
-                            unitNameLocationForTarget.get(targetName) match {
-                              case Some(targetLocation) =>
-                                val diffX = targetLocation.x - playerLocation.x
-                                val diffY = targetLocation.y - playerLocation.y
-                                val facingAngle = Math.atan2(diffY, diffX)
-
-                                val normalizedFacingAngle = if (facingAngle < 0) {
-                                  facingAngle + Math.PI * 2
-                                } else if (facingAngle > Math.PI * 2) {
-                                  facingAngle - Math.PI * 2
-                                } else {
-                                  facingAngle
-                                }
-
-                                
-                                val (minFacingAngle, maxFacingAngle) =
-                                  if (normalizedFacingAngle > playerLocation.angle) {
-                                    (playerLocation.angle.toDouble, normalizedFacingAngle)
+                    val (
+                      nameToPlayerEntityForTarget, 
+                      harmfulAoesFromEntities, 
+                      guidToEntityLocation
+                    ) = Player.getEntities()
+ 
+                    nameToPlayerEntityForTarget.get(player.name) match {
+                      case Some(playerEntity) =>
+                        val harmfulAoesWithTargetCasting = Target.getCastingSpellIdOpt match {
+                          case Some(spellId) =>
+                            playerEntity.targetGUIDOpt match {
+                                case Some(targetGUID) if playerEntity.guid == targetGUID =>
+                                  if (spellId == Configuration.Aoes.DancingBlade) {
+                                    val dancingBladeEntity = AreaTriggerEntity(
+                                      id = Configuration.Aoes.DancingBlade,
+                                      radius = 6,
+                                      playerEntity.x,
+                                      playerEntity.y,
+                                      playerEntity.z
+                                    )
+                                    harmfulAoesFromEntities :+ dancingBladeEntity
                                   } else {
-                                    (normalizedFacingAngle, playerLocation.angle.toDouble)
+                                    harmfulAoesFromEntities
                                   }
-
-                                val innerAngle = maxFacingAngle - minFacingAngle
-                                val outerAngle = (2 * Math.PI - maxFacingAngle) + minFacingAngle
-
-                                if ((playerLocation.angle - normalizedFacingAngle).abs < 0.3) {
-                                  Future.successful(())
-                                } else {
-                                  if (innerAngle < outerAngle) {
-                                    val turnDuration =  50.milliseconds
-
-                                    if (normalizedFacingAngle < playerLocation.angle) {
-                                      println(s"RIGHT1 ${player.name} ${targetName} - playerLocation " + playerLocation + " - targetLocation: " + targetLocation + " - ttarget angle " + normalizedFacingAngle)
-                                      Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
-                                    } else {
-                                      println(s"LEFT1 ${player.name} ${targetName} - playerLocation " + playerLocation + " - targetLocation: " + targetLocation + " - ttarget angle " + normalizedFacingAngle)
-                                      Wow.pressAndReleaseKeystroke(Keys.Left, turnDuration)
-                                    }
-                                  } else {
-                                    val turnDuration = 50.milliseconds
-
-                                    if (normalizedFacingAngle < playerLocation.angle) {
-                                      println(s"RIGHT2 ${player.name} ${targetName} - playerLocation " + playerLocation + " - targetLocation: " + targetLocation + " - ttarget angle " + normalizedFacingAngle)
-                                      Wow.pressAndReleaseKeystroke(Keys.Left)
-                                    } else {
-                                      println(s"LEFT12 ${player.name} ${targetName} - playerLocation " + playerLocation + " - targetLocation: " + targetLocation + " - ttarget angle " + normalizedFacingAngle)
-                                      Wow.pressAndReleaseKeystroke(Keys.Right)
-                                    }
-                                  }
-                                }
-                              case _ => Future.successful(())
+                                case _ => harmfulAoesFromEntities
                             }
-                          case _ => Future.successful(())
+                          case _ => harmfulAoesFromEntities
                         }
-                      case _ => Future.successful(())
+                        
+                        val harmfulAoes = if (Wow.foundSentinel) {
+                          if (Player.hasDebuff(Thunderstrike)) {
+                            val thunderstrikeEntity = AreaTriggerEntity(
+                              id = Thunderstrike.id,
+                              radius = Thunderstrike.radiusOpt.get,
+                              playerEntity.x,
+                              playerEntity.y,
+                              playerEntity.z
+                            )
+                            harmfulAoesWithTargetCasting :+ thunderstrikeEntity
+                          } else {
+                            harmfulAoesWithTargetCasting
+                          }
+                        } else {
+                          harmfulAoesWithTargetCasting
+                        }
+
+                        val isInAtLeastOneHarmfulAoe = harmfulAoes
+                          .find { areaTriggerEntity => 
+                            Player.isInAoe(playerEntity, areaTriggerEntity)
+                          }
+                          .isDefined
+                        
+                        val isPlayerMoving = Player.isMovingFromMemory(playerEntity)
+                        val shouldTryAutoFacing = if (Player.isMovingFromMemory(playerEntity)) {
+                          false
+                        } else if (isInAtLeastOneHarmfulAoe) {
+                          Player.findSafeSpot(
+                            playerEntity.x, 
+                            playerEntity.y, 
+                            playerEntity.z,
+                            waypoints, 
+                            harmfulAoes
+                          ) match {
+                            case Some((ctmX, ctmY)) =>
+                              Wow.clickToMoveSlave(ctmX, ctmY, playerEntity.z, team)
+                              false
+                            case _ => true
+                          }
+                        } else {
+                          true
+                        }
+                        
+                        if (!shouldTryAutoFacing) {
+                          true
+                        } else {
+                          playerEntity.targetGUIDOpt match {
+                            case Some(targetGUID) if playerEntity.guid != targetGUID =>
+                              guidToEntityLocation.get(targetGUID) match {
+                                case Some(targetEntity) =>
+                                  //Memory.writeFloat(player.hProcess, targetEntity.xAddress, 0f)
+                                  val diffX = targetEntity.x - playerEntity.x
+                                  val diffY = targetEntity.y - playerEntity.y
+                                  val facingAngle = Math.atan2(diffY, diffX)
+  
+                                  val normalizedFacingAngle = if (facingAngle < 0) {
+                                    (facingAngle + Math.PI * 2).toFloat
+                                  } else if (facingAngle > Math.PI * 2) {
+                                    (facingAngle - Math.PI * 2).toFloat
+                                  } else {
+                                    facingAngle.toFloat
+                                  }
+         
+                                  val (minFacingAngle, maxFacingAngle) =
+                                    if (normalizedFacingAngle > playerEntity.angle) {
+                                      (playerEntity.angle, normalizedFacingAngle)
+                                    } else {
+                                      (normalizedFacingAngle, playerEntity.angle)
+                                    }
+  
+                                  val innerAngle = maxFacingAngle - minFacingAngle
+                                  val outerAngle = (2 * Math.PI - maxFacingAngle) + minFacingAngle
+                                  
+                                  if ((playerEntity.angle - normalizedFacingAngle).abs < 0.3) {
+                                    true
+                                  } else {
+                                    //Memory.writeFloat(player.hProcess, playerEntity.angleAddress, normalizedFacingAngle)
+                                    if (innerAngle < outerAngle) {
+                                      val turnDuration =  50.milliseconds
+  
+                                      if (normalizedFacingAngle < playerEntity.angle) {
+                                        Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
+                                      } else {
+                                        Wow.pressAndReleaseKeystroke(Keys.Left, turnDuration)
+                                      }
+                                    } else {
+                                      val turnDuration = 50.milliseconds
+  
+                                      if (normalizedFacingAngle < playerEntity.angle) {
+                                        Wow.pressAndReleaseKeystroke(Keys.Left)
+                                      } else {
+                                        Wow.pressAndReleaseKeystroke(Keys.Right)
+                                      }
+                                    }
+                                    false
+                                  }
+                                case _ => true
+                              }
+                            case _ => true
+                          }
+                        }
+                      case _ => true
                     }
                   }
                 }
               }
           }
-          Await.result(autoFacingFutures, 10.seconds)
-
-          Thread.sleep(50)
+          val isOneToonNotFacingTarget = Await
+            .result(autoFacingFutures, 10.seconds)
+            .find(!_)
+            .isDefined
+            
+          if (isOneToonNotFacingTarget) {
+            Thread.sleep(10)
+          } else {
+            Thread.sleep(1000)
+          }
         } match {
           case Success(_) =>
           case Failure(e) =>
@@ -314,7 +403,7 @@ object Main {
             Thread.sleep(1000)
         }
       } else {
-        Thread.sleep(100)
+        Thread.sleep(1000)
       }
     }
   }
@@ -326,6 +415,16 @@ object Main {
           val actionFutures = Future.traverse(team.players) {
             case (spellTargetType, player) =>
               implicit val implicitPlayer = player
+              
+              /*if (Player.isPrimary) {
+                val (nameToPlayerEntity, _, _) = Player.getEntities()
+                nameToPlayerEntity.get(player.name) match {
+                  case Some(playerEntity) =>
+                    write.println(s"${playerEntity.x},${playerEntity.y},${playerEntity.z}")
+                    write.flush()
+                  case _ =>
+                }
+              }*/
 
               Future {
                 blocking {
@@ -336,11 +435,11 @@ object Main {
                     case ScaleUp =>
                       Logger.debug(s"Rescaling detected - Scaling up - $currentResolution")
                       Wow.pressAndReleaseKeystroke(Keys.F8)
-                      Wow.pressAndReleaseKeystrokes(List(Keys.LControlKey, Keys.U))
+                      //Wow.pressAndReleaseKeystrokes(List(Keys.LControlKey, Keys.U))
                     case ScaleDown =>
                       Logger.debug(s"Rescaling detected - Scaling down - $currentResolution")
                       Wow.pressAndReleaseKeystroke(Keys.F7)
-                      Wow.pressAndReleaseKeystrokes(List(Keys.LControlKey, Keys.U))
+                      //Wow.pressAndReleaseKeystrokes(List(Keys.LControlKey, Keys.U))
                     case NoScaling =>
                       player.executeNextAction
                   }
