@@ -24,4 +24,5 @@ trait EntityLocation {
   val yAddress: Long
   val zAddress: Long
   val guid: String
+  val name: String
 }

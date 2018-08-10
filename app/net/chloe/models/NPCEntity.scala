@@ -7,5 +7,6 @@ case class NPCEntity(
   val xAddress: Long,
   val yAddress: Long,
   val zAddress: Long,
-  val guid: String
+  val guid: String,
+  val name: String
 ) extends EntityLocation

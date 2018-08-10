@@ -269,6 +269,8 @@ object Wow {
     Future {
       blocking {
         if (isCtmInProgress.compareAndSet(false, true)) {
+          // Wait for all auto facing moves to stop.
+          Thread.sleep(20)
           val now = DateTime.now
           val shouldAutoFace = now.getMillis - lastLeftClick.getMillis < 200
           lastLeftClick = DateTime.now

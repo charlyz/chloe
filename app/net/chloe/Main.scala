@@ -58,6 +58,7 @@ import org.joda.time.{Duration => JodaDuration, _}
 import java.io._
 import net.chloe.models.spells.hov._
 import scala.io.Source
+import net.chloe.win32.Implicits._
 
 object Main {
 
@@ -66,6 +67,7 @@ object Main {
   @volatile var stop = false
   val playerToLocationsLookup: MMap[WowClass, Map[String, PlayerEntity]] = MMap()
   val write = new PrintWriter(new FileOutputStream(new File("waypoints.txt"), true))
+  val autoFacingForkjoinPool = ExecutionContext.fromExecutor(new ForkJoinPool())
   
   def main(args: Array[String]) = {
     val hWowWindows = Wow.getWindows("Ultimate")
@@ -101,6 +103,29 @@ object Main {
           //println("asdfasdf")
           //val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
           //saveImage("bla"+UUID.randomUUID(), a)
+          
+          /*var i = 45500000
+          Thread.sleep(10000)
+          println("start")
+          while (i < 55479696) {
+            val gameUI: Long = Memory.readPointer(hProcess, baseAddress + i)
+            if (i % 100000 == 0) println("blub " + i)
+            val x = Memory.readFloat(hProcess, gameUI + 0x290)
+            //3797.5623,542.4503,603.33765
+            if (x <= 3800 && x >= 3790) {
+              val y = Memory.readFloat(hProcess, gameUI + 0x294)
+              if (y <= 548 && y >= 538) {
+                val z = Memory.readFloat(hProcess, gameUI + 0x298)
+                if (z <= 606 && z >= 600) {
+                  println(s"FOUIND IT $x - $y - $z : $i")
+                  i = 55479696
+                }
+              }
+            }
+            
+            i = i + 1
+          }
+          println("end")*/
 
           Some(Healer -> player)
         } else if (title.contains("Monria")) {
@@ -279,21 +304,61 @@ object Main {
                           case _ => harmfulAoesFromEntities
                         }
                         
+                       val hybridNPCAoes = guidToEntityLocation.values
+                         .flatMap { entityLocation =>
+                           if (entityLocation.name == Configuration.HydridNPCsAreaTriggers.CracklingStorm) {
+                             Some(
+                               AreaTriggerEntity(
+                                 id = Configuration.Aoes.CracklingStorm,
+                                 radius = 3,
+                                 entityLocation.x,
+                                 entityLocation.y,
+                                 entityLocation.z
+                               )
+                             )
+                           } else {
+                             None
+                           }
+                         }
+                         .toList
+                        
+                       val harmfulAoesWithHybridNPCs = harmfulAoesWithTargetCasting.filter { 
+                           harmfulAoeWithTargetCasting =>
+                             // Remove area trigger entity for crackling storm because we
+                             // want to the NPC location.
+                             
+                             harmfulAoeWithTargetCasting.id != Configuration.Aoes.CracklingStorm
+                         } ++ hybridNPCAoes
+                       
                         val harmfulAoes = if (Wow.foundSentinel) {
                           if (Player.hasDebuff(Thunderstrike)) {
-                            val thunderstrikeEntity = AreaTriggerEntity(
-                              id = Thunderstrike.id,
-                              radius = Thunderstrike.radiusOpt.get,
-                              playerEntity.x,
-                              playerEntity.y,
-                              playerEntity.z
-                            )
-                            harmfulAoesWithTargetCasting :+ thunderstrikeEntity
+                            val thunderstrikeEntities = team.players.keys
+                              .flatMap { case spellTargetType =>
+                                if (spellTargetType != player.spellTargetType) {
+                                  nameToPlayerEntityForTarget.get(player.name) match {
+                                    case Some(playerEntity) =>
+                                      Some(
+                                        AreaTriggerEntity(
+                                          id = Thunderstrike.id,
+                                          radius = Thunderstrike.radiusOpt.get,
+                                          playerEntity.x,
+                                          playerEntity.y,
+                                          playerEntity.z
+                                        )
+                                      )
+                                    case _ => None
+                                  }
+                                } else {
+                                  None
+                                }
+                              }
+                              .toList 
+                            harmfulAoesWithHybridNPCs ++ thunderstrikeEntities
                           } else {
-                            harmfulAoesWithTargetCasting
+                            harmfulAoesWithHybridNPCs
                           }
                         } else {
-                          harmfulAoesWithTargetCasting
+                          harmfulAoesWithHybridNPCs
                         }
 
                         val isInAtLeastOneHarmfulAoe = harmfulAoes
@@ -303,7 +368,7 @@ object Main {
                           .isDefined
                         
                         val isPlayerMoving = Player.isMovingFromMemory(playerEntity)
-                        val shouldTryAutoFacing = if (Player.isMovingFromMemory(playerEntity)) {
+                        val shouldTryAutoFacing = if (isPlayerMoving) {
                           false
                         } else if (isInAtLeastOneHarmfulAoe) {
                           Player.findSafeSpot(
@@ -313,9 +378,10 @@ object Main {
                             waypoints, 
                             harmfulAoes
                           ) match {
-                            case Some((ctmX, ctmY)) =>
-                              Wow.clickToMoveSlave(ctmX, ctmY, playerEntity.z, team)
-                              false
+                            case Some((ctmX, ctmY, ctmZ)) =>
+                              //Wow.clickToMoveSlave(ctmX, ctmY, playerEntity.z, team)
+                              //false
+                              Player.runToPoint(playerEntity, ctmX, ctmY, ctmZ)
                             case _ => true
                           }
                         } else {
@@ -323,57 +389,20 @@ object Main {
                         }
                         
                         if (!shouldTryAutoFacing) {
-                          true
+                          if (isInAtLeastOneHarmfulAoe) {
+                            false
+                          } else {
+                            true
+                          }
                         } else {
                           playerEntity.targetGUIDOpt match {
                             case Some(targetGUID) if playerEntity.guid != targetGUID =>
                               guidToEntityLocation.get(targetGUID) match {
                                 case Some(targetEntity) =>
-                                  //Memory.writeFloat(player.hProcess, targetEntity.xAddress, 0f)
-                                  val diffX = targetEntity.x - playerEntity.x
-                                  val diffY = targetEntity.y - playerEntity.y
-                                  val facingAngle = Math.atan2(diffY, diffX)
-  
-                                  val normalizedFacingAngle = if (facingAngle < 0) {
-                                    (facingAngle + Math.PI * 2).toFloat
-                                  } else if (facingAngle > Math.PI * 2) {
-                                    (facingAngle - Math.PI * 2).toFloat
-                                  } else {
-                                    facingAngle.toFloat
-                                  }
-         
-                                  val (minFacingAngle, maxFacingAngle) =
-                                    if (normalizedFacingAngle > playerEntity.angle) {
-                                      (playerEntity.angle, normalizedFacingAngle)
-                                    } else {
-                                      (normalizedFacingAngle, playerEntity.angle)
-                                    }
-  
-                                  val innerAngle = maxFacingAngle - minFacingAngle
-                                  val outerAngle = (2 * Math.PI - maxFacingAngle) + minFacingAngle
-                                  
-                                  if ((playerEntity.angle - normalizedFacingAngle).abs < 0.3) {
+                                  if (Wow.isCtmInProgress.get) {
                                     true
                                   } else {
-                                    //Memory.writeFloat(player.hProcess, playerEntity.angleAddress, normalizedFacingAngle)
-                                    if (innerAngle < outerAngle) {
-                                      val turnDuration =  50.milliseconds
-  
-                                      if (normalizedFacingAngle < playerEntity.angle) {
-                                        Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
-                                      } else {
-                                        Wow.pressAndReleaseKeystroke(Keys.Left, turnDuration)
-                                      }
-                                    } else {
-                                      val turnDuration = 50.milliseconds
-  
-                                      if (normalizedFacingAngle < playerEntity.angle) {
-                                        Wow.pressAndReleaseKeystroke(Keys.Left)
-                                      } else {
-                                        Wow.pressAndReleaseKeystroke(Keys.Right)
-                                      }
-                                    }
-                                    false
+                                    Player.facePoint(playerEntity, targetEntity.x, targetEntity.y, targetEntity.z)
                                   }
                                 case _ => true
                               }
@@ -383,7 +412,7 @@ object Main {
                       case _ => true
                     }
                   }
-                }
+                }(autoFacingForkjoinPool)
               }
           }
           val isOneToonNotFacingTarget = Await

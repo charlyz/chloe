@@ -30,6 +30,10 @@ object Configuration {
     val CracklingStorm = 198895
   }
   
+  object HydridNPCsAreaTriggers {
+    val CracklingStorm = "Crackling Storm"
+  }
+  
   val HarmfulAoes = List(
     Aoes.FreezingTrap,
     Aoes.Flare,
@@ -46,7 +50,7 @@ object Configuration {
     }
     
     object GameUI {
-      val Base = 0x2B5F710 
+      val Base = 0x2B688C0//0x2B5F710 
       val CursorX = 0x290
       val CursorY = 0x294
       val CursorZ = 0x298
@@ -60,7 +64,7 @@ object Configuration {
     }
     
     object Camera {
-      val Base1 = 0x2B5F680
+      val Base1 = 0x2B68830
       val Base2 = 0x3330
       val Origin = 0x10
       val MatrixX = 0x1C
@@ -70,7 +74,7 @@ object Configuration {
     }
     
     object EntitiesList {
-      val Base = 0x27E48F8
+      val Base = 0x27DCAB8
       val FirstEntry = 0x18
       val NextEntry = 0x70
       
@@ -97,8 +101,8 @@ object Configuration {
       }
       
       object NPC {
-        val Name1 = 0x1740
-        val Name2 = 0xE0
+        val Name1 = 0xC68
+        val Name2 = 0x080
       }
       
       object Player {
@@ -110,7 +114,7 @@ object Configuration {
     }
     
     object NamesCache {
-      val Base = 0x23DD488
+      val Base = 0x23D5488
       val NextEntry = 0x0
       
       object Entry {
