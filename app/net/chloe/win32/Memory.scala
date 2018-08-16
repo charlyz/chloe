@@ -101,7 +101,7 @@ object Memory {
         address, 
         16
       )
-      .getByteArray(0, 8)
+      .getByteArray(0, 16)
       .map("%02x".format(_))
       .mkString
       .toUpperCase()

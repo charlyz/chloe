@@ -201,6 +201,8 @@ case class DruidResto(
     val dpsTwo = team.getPlayer(DpsTwo)
     val dpsThree = team.getPlayer(DpsThree)
     val tank = team.getPlayer(Tank)
+    
+    val meHealth = Player.getHealthPercentage
 
     //println("Player.getBuffRemainingTimeOpt(Lifebloom) " + Player.getBuffRemainingTimeOpt(Lifebloom))
     //println("Player.canCast(Lifebloom) " + Player.canCast(Lifebloom))
@@ -210,8 +212,7 @@ case class DruidResto(
     //println("Player.getBuffRemainingTimeOpt(Regrowth)(dpsTwo) " + Player.getBuffRemainingTimeOpt(Regrowth)(dpsTwo))
     //println("Player.getBuffRemainingTimeOpt(Regrowth)(tank) " + Player.getBuffRemainingTimeOpt(Regrowth)(tank))
     //println("Player.getBuffRemainingTimeOpt(Regrowth)(dpsOne1) " + Player.getBuffRemainingTimeOpt(Regrowth)(dpsOne))
-    if (!Player.isCasting && !Player.isChanneling) {
-      val meHealth = Player.getHealthPercentage
+    if (meHealth > 1 && !Player.isCasting && !Player.isChanneling) {
       val dpsOneHealth = Player.getHealthPercentage(dpsOne)
       val dpsTwoHealth = Player.getHealthPercentage(dpsTwo)
       val dpsThreeHealth = Player.getHealthPercentage(dpsThree)
@@ -234,11 +235,11 @@ case class DruidResto(
         dpsThreeHealth < Configuration.MajorHealthThreshold && 
         tankHealth < Configuration.MajorHealthThreshold &&
         
-        dpsOneHealth > 0 &&
-        meHealth > 0 &&
-        dpsTwoHealth > 0 &&
-        dpsThreeHealth > 0 &&
-        tankHealth > 0 &&
+        dpsOneHealth > 1 &&
+        meHealth > 1 &&
+        dpsTwoHealth > 1 &&
+        dpsThreeHealth > 1 &&
+        tankHealth > 1 &&
         
         canCastWildGrowth &&
         canCastTranquility &&
@@ -250,7 +251,7 @@ case class DruidResto(
           sendAction(WildGrowth -> None)
         }
       } else if (
-        tankHealth > 0 && 
+        tankHealth > 1 && 
         tankHealth < Configuration.CriticalHealthThreshold && 
         isInCombat && 
         (canCastIronbark || canCastSwiftmend)
@@ -261,7 +262,7 @@ case class DruidResto(
           sendAction(Ironbark -> Some(Tank))
         }
       } else if (
-        meHealth > 0 && 
+        meHealth > 1 && 
         meHealth < Configuration.CriticalHealthThreshold && 
         isInCombat && 
         (canCastBarkskin || canCastSwiftmend || canCastRenewal)
@@ -274,58 +275,58 @@ case class DruidResto(
           sendAction(RestoBarkskin -> None)
         }
       } else if (
-        dpsOneHealth > 0 && 
+        dpsOneHealth > 1 && 
         dpsOneHealth < Configuration.CriticalHealthThreshold && 
         isInCombat && 
         canCastSwiftmend
       ) {
         sendAction(Swiftmend -> Some(DpsOne))
       } else if (
-        dpsTwoHealth > 0 && 
+        dpsTwoHealth > 1 && 
         dpsTwoHealth < Configuration.CriticalHealthThreshold && 
         isInCombat && 
         canCastSwiftmend
       ) {
         sendAction(Swiftmend -> Some(DpsTwo))
       } else if (
-        dpsThreeHealth > 0 && 
+        dpsThreeHealth > 1 && 
         dpsThreeHealth < Configuration.CriticalHealthThreshold && 
         isInCombat && 
         canCastSwiftmend
       ) {
         sendAction(Swiftmend -> Some(DpsThree))
       } else if (
-        meHealth < Configuration.FullHealthThreshold ||
-        dpsOneHealth < Configuration.FullHealthThreshold ||
-        dpsTwoHealth < Configuration.FullHealthThreshold ||
-        dpsThreeHealth < Configuration.FullHealthThreshold ||
-        tankHealth < Configuration.FullHealthThreshold
+        (meHealth < Configuration.FullHealthThreshold && meHealth > 1) ||
+        (dpsOneHealth < Configuration.FullHealthThreshold && dpsOneHealth > 1) ||
+        (dpsTwoHealth < Configuration.FullHealthThreshold && dpsTwoHealth > 1) ||
+        (dpsThreeHealth < Configuration.FullHealthThreshold && dpsThreeHealth > 1) ||
+        (tankHealth < Configuration.FullHealthThreshold && tankHealth > 1)
       ) {
-        val tankHealthWeight = if (tankHealth <= 0) {
+        val tankHealthWeight = if (tankHealth <= 1 || tankHealth > 99) {
           (-100).toFloat
         } else {
           1 - tankHealth.toFloat / 100f //+ 0.5f
         }
-        
-        val healerHealthWeight = if (meHealth <= 0) {
+
+        val healerHealthWeight = if (meHealth <= 0 || meHealth > 99) {
           (-100).toFloat
         } else {
           1 - meHealth.toFloat / 100f //+ 0.4f
         }
         
-        val dpsOneHealthWeight = if (dpsOneHealth <= 0) {
+        val dpsOneHealthWeight = if (dpsOneHealth <= 0 || dpsOneHealth > 99) {
           (-100).toFloat
         } else {
           1 - dpsOneHealth.toFloat / 100f //+ 0.3f
         }
         
-        val dpsTwoHealthWeight = if (dpsTwoHealth <= 0) {
+        val dpsTwoHealthWeight = if (dpsTwoHealth <= 0 || dpsTwoHealth > 99) {
           (-100).toFloat
         } else {
           1 - dpsTwoHealth.toFloat / 100f //+ 0.2f
         }
-        
-        val dpsThreeHealthWeight = if (dpsThreeHealth <= 0) {
+
+        val dpsThreeHealthWeight = if (dpsThreeHealth <= 0 || dpsThreeHealth > 99) {
           (-100).toFloat
         } else {
           1 - dpsThreeHealth.toFloat / 100f //+ 0.1f
@@ -452,7 +453,7 @@ case class DruidResto(
         //  spellAndTargetToPriority(HealingTouch -> Some(Tank)) += tankHealthWeight
         //  spellAndTargetToPriority(HealingTouch -> Some(Healer)) += healerHealthWeight
         //}
-        
+        println(spellAndTargetToPriority)
         getSpellAndTargetBasedOnPriorityOpt(spellAndTargetToPriority.toMap) match {
           case Some(spellAndTarget) => sendAction(spellAndTarget)
           case _ => Logger.debug(s"${me.name} - Executing no heal.")

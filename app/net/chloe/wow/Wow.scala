@@ -51,18 +51,19 @@ object Wow {
     
   def pressAndReleaseKeystrokes(
     keys: List[Int],
-    duration: Duration = 50.millis
+    pressingDuration: Duration = 50.millis,
+    releasingDuration: Duration = 50.millis
   )(
     implicit player: WowClass
   ) = player.name.synchronized {
     keys.foreach { key =>
       User32.SendMessage(player.hWindow, 0x100, key, 0)
-      Thread.sleep(duration.toMillis)
+      Thread.sleep(pressingDuration.toMillis)
     }
     
     keys.reverse.foreach { key =>
       User32.SendMessage(player.hWindow, 0x101, key, 0)
-      Thread.sleep(duration.toMillis)
+      Thread.sleep(releasingDuration.toMillis)
     }    
   }
   
@@ -92,8 +93,8 @@ object Wow {
   }
   
   
-  def pressAndReleaseKeystroke(key: Int, duration: Duration = 50.millis)(implicit player: WowClass) = {
-    pressAndReleaseKeystrokes(List(key), duration)   
+  def pressAndReleaseKeystroke(key: Int, pressingDuration: Duration = 50.millis)(implicit player: WowClass) = {
+    pressAndReleaseKeystrokes(List(key), pressingDuration)   
   }
   
   def getPrimaryPlayer(team: Team) = {
@@ -204,7 +205,7 @@ object Wow {
     playerName: String,  
     playerNameToPlayerEntity: Map[String, PlayerEntity],
     npcEntities: List[NPCEntity]
-  ): List[EntityLocation] = {
+  ): List[WowUnit] = {
    val playerEntities = team.players
       .flatMap { case (_, player) =>
         if (player.name == playerName) {
@@ -234,10 +235,10 @@ object Wow {
     val (x, y) = getWorldToScreenCoordinates(ctmX, ctmY, ctmZ)(player)
     println(s"${player.name} is going there: $x - $y")
     
-    val (nameToPlayerEntity, _, guidToEntityLocation) = Player.getEntities()
+    val (nameToPlayerEntity, _, guidToUnit) = Player.getEntities()
     nameToPlayerEntity.get(player.name) match {
       case Some(playerEntity) => 
-        val otherEntitiesToHide = guidToEntityLocation.values.filter(_.guid != playerEntity.guid)
+        val otherEntitiesToHide = guidToUnit.values.filter(_.guid != playerEntity.guid)
         
         @volatile var stopHiding = false
         val hidingOtherPlayersFuture = Future {
@@ -260,6 +261,21 @@ object Wow {
     }
   }
   
+  def makeToonsRunToPoint(
+    ctmX: Float, 
+    ctmY: Float, 
+    ctmZ: Float
+  )(
+    implicit player: WowClass
+  ): Unit = {
+    val (nameToPlayerEntity, _, guidToUnit) = Player.getEntities()
+    nameToPlayerEntity.get(player.name) match {
+      case Some(playerEntity) => 
+        Player.runToPoint(playerEntity, ctmX, ctmY, ctmZ)
+      case _ =>
+    }
+  }
+  
   def clickToMoveSlaves(
     team: Team, 
     xOpt: Option[Float] = None, 
@@ -275,6 +291,7 @@ object Wow {
           val shouldAutoFace = now.getMillis - lastLeftClick.getMillis < 200
           lastLeftClick = DateTime.now
           if (shouldAutoFace) {
+            println("shouldAutoFace " + shouldAutoFace)
             implicit val primaryPlayer = Wow.getPrimaryPlayer(team)
             val (ctmX, ctmY, ctmZ) = (xOpt, yOpt, zOpt) match {
               case (Some(x), Some(y), Some(z)) => (x, y, z)
@@ -285,7 +302,8 @@ object Wow {
               case (_, player) if player != primaryPlayer =>
                 Future {
                   blocking {
-                    clickToMoveSlave(ctmX, ctmY, ctmZ, team)(player)
+                    //clickToMoveSlave(ctmX, ctmY, ctmZ, team)(player)
+                    makeToonsRunToPoint(ctmX, ctmY, ctmZ)(player)
                   }
                 }
               case _ => Future.successful(())
@@ -295,7 +313,6 @@ object Wow {
           }
           
           isCtmInProgress.set(false)
-
         } else {
           ()
         }

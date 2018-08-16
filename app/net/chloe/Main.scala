@@ -66,19 +66,27 @@ object Main {
   @volatile var autoFacingBotRunning = false
   @volatile var stop = false
   val playerToLocationsLookup: MMap[WowClass, Map[String, PlayerEntity]] = MMap()
-  val write = new PrintWriter(new FileOutputStream(new File("waypoints.txt"), true))
-  val autoFacingForkjoinPool = ExecutionContext.fromExecutor(new ForkJoinPool())
+  val write = new PrintWriter(new FileOutputStream(new File("hov-static-fields-safe-spots.txt"), true))
+  val autoFacingForkjoinPool = ExecutionContext.fromExecutor(new ForkJoinPool(64))
+  val rotationForkjoinPool = ExecutionContext.fromExecutor(new ForkJoinPool(64))
   
+  val hovStaticFieldSafeSpots = Source.fromFile("conf/waypoints/hov-static-fields-safe-spots.txt").getLines
+    .map { line =>
+      val splitLine = line.split(",")
+      (splitLine(0).toFloat, splitLine(1).toFloat, splitLine(2).toFloat)
+    }
+    .toSet
+  
+  val waypoints = Source.fromFile("conf/waypoints/hov.txt").getLines
+    .map { line =>
+      val splitLine = line.split(",")
+      (splitLine(0).toFloat, splitLine(1).toFloat, splitLine(2).toFloat)
+    }
+    .toSet ++ hovStaticFieldSafeSpots
+      
   def main(args: Array[String]) = {
     val hWowWindows = Wow.getWindows("Ultimate")
-    
-    val waypoints = Source.fromFile("conf/waypoints/hov.txt").getLines
-      .map { line =>
-        val splitLine = line.split(",")
-        (splitLine(0).toFloat, splitLine(1).toFloat, splitLine(2).toFloat)
-      }
-      .toSet
-
+ 
     val players: Map[SpellTargetType, WowClass] = hWowWindows
       .flatMap { hWowWindow =>
         val title = Wow.getWindowTitleImpl(hWowWindow)
@@ -87,6 +95,7 @@ object Main {
           None
         } else if (title.contains("Rooke")) {
           val player = DruidResto(
+              
             name = "Rooke",
             hWowWindow,
             Healer
@@ -172,7 +181,17 @@ object Main {
       //refreshUnitLocationsForever(team)
       mouseHookStartStop(team)
       keyboardHookStartStop()
-      Await.result(Future.sequence(List(startAutoFacingBot(waypoints), startRotationBot)), Duration.Inf)
+      
+      val autoFacingFutures = team.players
+        .map { case (_, player) =>
+          startAutoFacingBot(waypoints, team)(player)
+        }
+        .toList
+      
+      Await.result(
+        Future.sequence(startRotationBot +: autoFacingFutures), 
+        Duration.Inf
+      )
       ()
     } else {
       Logger.info("Team not found.")
@@ -261,170 +280,268 @@ object Main {
     }
   }
 
-  def startAutoFacingBot(waypoints: Set[(Float, Float, Float)])(implicit team: Team) = Future {
+  def startAutoFacingBot(waypoints: Set[(Float, Float, Float)], team: Team)(implicit  player: WowClass) = Future {
     while (!stop) { 
       if (autoFacingBotRunning) {
         Try {
-          val autoFacingFutures = Future.traverse(team.players) {
-            case (spellTargetType, player) =>
-              implicit val implicitPlayer = player
-
-              if (Player.isPrimary) {
-              //if (player.name != "Cayla") {
-                Future.successful(true)
-              } else {
-                Future {
-                  blocking {
-                    val (
-                      nameToPlayerEntityForTarget, 
-                      harmfulAoesFromEntities, 
-                      guidToEntityLocation
-                    ) = Player.getEntities()
+          if (Player.isPrimary) {
+          //if (player.name != "Cayla") {
+            Thread.sleep(1000)
+            ()
+          } else {
+            val isToonFacingTarget = {
+              val (
+                nameToPlayerEntityForTarget, 
+                harmfulAoesFromEntities, 
+                guidToUnit
+              ) = Player.getEntities()
  
-                    nameToPlayerEntityForTarget.get(player.name) match {
-                      case Some(playerEntity) =>
-                        val harmfulAoesWithTargetCasting = Target.getCastingSpellIdOpt match {
-                          case Some(spellId) =>
-                            playerEntity.targetGUIDOpt match {
-                                case Some(targetGUID) if playerEntity.guid == targetGUID =>
-                                  if (spellId == Configuration.Aoes.DancingBlade) {
-                                    val dancingBladeEntity = AreaTriggerEntity(
-                                      id = Configuration.Aoes.DancingBlade,
-                                      radius = 6,
+              nameToPlayerEntityForTarget.get(player.name) match {
+                case Some(playerEntity) =>      
+                  val hybridAoes = guidToUnit.values
+                    .flatMap { unit =>
+                      //println(unit.name + " targets " + unit.targetGUID + " and cast " + unit.castingSpellId)
+                      
+                      /*if (
+                       unit.guid == playerEntity.targetGUID
+                      ) {
+                        val d = Player.getDistanceBetween3DPoints(
+                          playerEntity.x,
+                          unit.x,
+                          playerEntity.y,
+                          unit.y,
+                          playerEntity.z,
+                          unit.z
+                        )
+                        //println("distance betwee " + player.name +  " and " + unit.name + " - d " + d)
+                        println("start")
+                        var i = 6000
+                        while (i < 7000) {
+                          //
+                          val a: Long = Memory.readPointer(player.hProcess, unit.entryBase + i)
+                          /*var j = 0
+                          while (j < 1000) {
+                            val e = Memory.readGUID(player.hProcess, a + j)
+                            if (guidToUnit.get(e).isDefined && guidToUnit(e).name == "Maylva") {
+                              println(unit.name + " i:" + i + " - j:" + j + " -  target is " + guidToUnit(e).name)
+                            }
+                            j = j + 1
+                          }*/
+                          
+                          val g = Memory.readInt(player.hProcess, unit.entryBase + i)
+                          /*if (g != 0) {
+                            println(s"${player.name} found spell $g for ${unit.name} at offset $i")
+                          }*/
+                          if (g == 198605 || g == 198595) {
+                            println(s"${player.name} found $g for ${unit.name} at offset $i")
+                          }
+                        
+                          i = i+1
+                        }
+                        println("end")
+                      }*/
+                      
+                     if (unit.name == Configuration.HydridNPCsAreaTriggers.CracklingStorm) {
+                        val areaTriggerEntity = AreaTriggerEntity(
+                          id = Configuration.Aoes.CracklingStorm,
+                          radius = 8,
+                          unit.x,
+                          unit.y,
+                          unit.z
+                        )
+                        val d = Player.getDistanceBetween3DPoints(
+                          playerEntity.x,
+                          unit.x,
+                          playerEntity.y,
+                          unit.y,
+                          playerEntity.z,
+                          unit.z
+                        )
+                        println(player.name + " is " + d + " yards away from NPC CracklingStorm " + areaTriggerEntity)
+                        List(areaTriggerEntity)
+                      } else if (unit.name == Configuration.HydridNPCsAreaTriggers.DancingBlade) {
+                        val areaTriggerEntity = AreaTriggerEntity(
+                          id = Configuration.Aoes.DancingBlade,
+                          radius = 10,
+                          unit.x,
+                          unit.y,
+                          unit.z
+                        )
+                        val d = Player.getDistanceBetween3DPoints(
+                          playerEntity.x,
+                          unit.x,
+                          playerEntity.y,
+                          unit.y,
+                          playerEntity.z,
+                          unit.z
+                        )
+                        println(player.name + " is " + d + " yards away from NPC DANCING BLADE " + areaTriggerEntity)
+                        List(areaTriggerEntity)
+                      } else if (
+                        unit.castingSpellId == Configuration.Aoes.CracklingStorm ||
+                        unit.castingSpellId == Configuration.Aoes.Thunderstrike ||
+                        unit.castingSpellId == 212040 // revitalize
+                      ) {
+                        guidToUnit.get(unit.targetGUID) match {
+                          case Some(targetUnit) =>
+                            println(unit.name + " is casting " + unit.castingSpellId + " - target guid is " + targetUnit.name)
+                            List(
+                              AreaTriggerEntity(
+                                unit.castingSpellId,
+                                radius = 8,
+                                targetUnit.x,
+                                targetUnit.y,
+                                targetUnit.z
+                              )
+                            )
+                          case _ => List()
+                        }
+                      } else if (unit.castingSpellId == Configuration.CastingSpells.DancingBlade) {
+                          println(unit.name + " is casting " + unit.castingSpellId + " - " + player.name + " runs!")
+                          team.players
+                            .flatMap { case (_, player) =>
+                              nameToPlayerEntityForTarget.get(player.name) match {
+                                case Some(playerEntity) =>
+                                  Some(
+                                    AreaTriggerEntity(
+                                      unit.castingSpellId,
+                                      radius = 10,
                                       playerEntity.x,
                                       playerEntity.y,
                                       playerEntity.z
                                     )
-                                    harmfulAoesFromEntities :+ dancingBladeEntity
-                                  } else {
-                                    harmfulAoesFromEntities
-                                  }
-                                case _ => harmfulAoesFromEntities
+                                  )
+                                case _ => None   
+                              }
                             }
-                          case _ => harmfulAoesFromEntities
-                        }
-                        
-                       val hybridNPCAoes = guidToEntityLocation.values
-                         .flatMap { entityLocation =>
-                           if (entityLocation.name == Configuration.HydridNPCsAreaTriggers.CracklingStorm) {
-                             Some(
-                               AreaTriggerEntity(
-                                 id = Configuration.Aoes.CracklingStorm,
-                                 radius = 3,
-                                 entityLocation.x,
-                                 entityLocation.y,
-                                 entityLocation.z
-                               )
-                             )
-                           } else {
-                             None
-                           }
-                         }
-                         .toList
-                        
-                       val harmfulAoesWithHybridNPCs = harmfulAoesWithTargetCasting.filter { 
-                           harmfulAoeWithTargetCasting =>
-                             // Remove area trigger entity for crackling storm because we
-                             // want to the NPC location.
-                             
-                             harmfulAoeWithTargetCasting.id != Configuration.Aoes.CracklingStorm
-                         } ++ hybridNPCAoes
-                       
-                        val harmfulAoes = if (Wow.foundSentinel) {
-                          if (Player.hasDebuff(Thunderstrike)) {
-                            val thunderstrikeEntities = team.players.keys
-                              .flatMap { case spellTargetType =>
-                                if (spellTargetType != player.spellTargetType) {
-                                  nameToPlayerEntityForTarget.get(player.name) match {
-                                    case Some(playerEntity) =>
-                                      Some(
-                                        AreaTriggerEntity(
-                                          id = Thunderstrike.id,
-                                          radius = Thunderstrike.radiusOpt.get,
-                                          playerEntity.x,
-                                          playerEntity.y,
-                                          playerEntity.z
-                                        )
-                                      )
-                                    case _ => None
-                                  }
-                                } else {
-                                  None
-                                }
-                              }
-                              .toList 
-                            harmfulAoesWithHybridNPCs ++ thunderstrikeEntities
-                          } else {
-                            harmfulAoesWithHybridNPCs
-                          }
-                        } else {
-                          harmfulAoesWithHybridNPCs
-                        }
+                            .toList
+                      } else if (unit.castingSpellId == Configuration.CastingSpells.HornOfValor) {
+                        println(unit.name + " is casting HornOfValor - " + player.name + " goes to safe spot")
+                        val areaTriggerEntity = AreaTriggerEntity(
+                          unit.castingSpellId,
+                          radius = 1,
+                          playerEntity.x,
+                          playerEntity.y,
+                          playerEntity.z,
+                          safeSpotsOpt = Some(hovStaticFieldSafeSpots)
+                        )
+                        List(areaTriggerEntity)
+                      } else {
+                        List()
+                      }
+                    }
+                    .toList
 
-                        val isInAtLeastOneHarmfulAoe = harmfulAoes
-                          .find { areaTriggerEntity => 
-                            Player.isInAoe(playerEntity, areaTriggerEntity)
-                          }
-                          .isDefined
-                        
-                        val isPlayerMoving = Player.isMovingFromMemory(playerEntity)
-                        val shouldTryAutoFacing = if (isPlayerMoving) {
-                          false
-                        } else if (isInAtLeastOneHarmfulAoe) {
-                          Player.findSafeSpot(
-                            playerEntity.x, 
-                            playerEntity.y, 
-                            playerEntity.z,
-                            waypoints, 
-                            harmfulAoes
-                          ) match {
-                            case Some((ctmX, ctmY, ctmZ)) =>
-                              //Wow.clickToMoveSlave(ctmX, ctmY, playerEntity.z, team)
-                              //false
-                              Player.runToPoint(playerEntity, ctmX, ctmY, ctmZ)
-                            case _ => true
-                          }
-                        } else {
-                          true
-                        }
-                        
-                        if (!shouldTryAutoFacing) {
-                          if (isInAtLeastOneHarmfulAoe) {
-                            false
+                  val harmfulAoesWithHybridNPCs = hybridAoes ++ harmfulAoesFromEntities
+               
+                  val harmfulAoes = if (Wow.foundSentinel) {
+                    if (Player.hasDebuff(Thunderstrike)) {
+                      val thunderstrikeEntitiesForPlayersLocations = team.players.keys
+                        .flatMap { case spellTargetType =>
+                          if (spellTargetType != player.spellTargetType) {
+                            nameToPlayerEntityForTarget.get(player.name) match {
+                              case Some(playerEntity) =>
+                                Some(
+                                  AreaTriggerEntity(
+                                    id = Thunderstrike.id,
+                                    radius = Thunderstrike.radiusOpt.get,
+                                    playerEntity.x,
+                                    playerEntity.y,
+                                    playerEntity.z
+                                  )
+                                )
+                              case _ => None
+                            }
                           } else {
-                            true
-                          }
-                        } else {
-                          playerEntity.targetGUIDOpt match {
-                            case Some(targetGUID) if playerEntity.guid != targetGUID =>
-                              guidToEntityLocation.get(targetGUID) match {
-                                case Some(targetEntity) =>
-                                  if (Wow.isCtmInProgress.get) {
-                                    true
-                                  } else {
-                                    Player.facePoint(playerEntity, targetEntity.x, targetEntity.y, targetEntity.z)
-                                  }
-                                case _ => true
-                              }
-                            case _ => true
+                            None
                           }
                         }
+                        .toList 
+                        
+                      val thunderstrikeEntitiesForFuturePlayersLocations = Player.futurePlayerLocations
+                        .map { case (futureX, futureY, futureZ) =>
+                          AreaTriggerEntity(
+                            id = Thunderstrike.id,
+                            radius = Thunderstrike.radiusOpt.get,
+                            futureX,
+                            futureY,
+                            futureZ
+                          )
+                        }
+                        .toList 
+                        
+                      harmfulAoesWithHybridNPCs ++ 
+                        thunderstrikeEntitiesForPlayersLocations ++
+                        thunderstrikeEntitiesForFuturePlayersLocations
+                    } else {
+                      harmfulAoesWithHybridNPCs
+                    }
+                  } else {
+                    harmfulAoesWithHybridNPCs
+                  }
+
+                  val isInAtLeastOneHarmfulAoe = harmfulAoes
+                    .find { areaTriggerEntity => 
+                      Player.isInAoe(playerEntity, areaTriggerEntity)
+                    }
+                    .isDefined
+
+                  val isPlayerMoving = Player.isMovingFromMemory(playerEntity)
+                  
+                  val shouldTryAutoFacing = true/*if (isPlayerMoving) {
+                    false
+                  } else if (isInAtLeastOneHarmfulAoe) {
+                    Player.findSafeSpot(
+                      playerEntity.x, 
+                      playerEntity.y, 
+                      playerEntity.z,
+                      playerEntity.angle,
+                      waypoints, 
+                      harmfulAoes,
+                      bestSafeSpotOpt = None
+                    ) match {
+                      case Some((ctmX, ctmY, ctmZ)) =>
+                        //Wow.clickToMoveSlave(ctmX, ctmY, playerEntity.z, team)
+                        //false
+                        Player.runToPoint(playerEntity, ctmX, ctmY, ctmZ)
                       case _ => true
                     }
+                  } else {
+                    true
+                  }*/
+                  
+                  if (!shouldTryAutoFacing) {
+                    if (isInAtLeastOneHarmfulAoe) {
+                      false
+                    } else {
+                      true
+                    }
+                  } else {
+                    if (playerEntity.guid != playerEntity.targetGUID) {
+                      guidToUnit.get(playerEntity.targetGUID) match {
+                        case Some(targetEntity) =>
+                          if (Wow.isCtmInProgress.get) {
+                            true
+                          } else {
+                            Player.facePoint(playerEntity, targetEntity.x, targetEntity.y, targetEntity.z)
+                          }
+                        case _ => true
+                      }
+                    } else {
+                      true
+                    }
                   }
-                }(autoFacingForkjoinPool)
+                case _ => true
               }
-          }
-          val isOneToonNotFacingTarget = Await
-            .result(autoFacingFutures, 10.seconds)
-            .find(!_)
-            .isDefined
-            
-          if (isOneToonNotFacingTarget) {
-            Thread.sleep(10)
-          } else {
-            Thread.sleep(1000)
-          }
+            }
+
+            //println(player.name + " isToonFacingTarget " + isToonFacingTarget)
+            if (isToonFacingTarget) {
+              Thread.sleep(200)
+            } else {
+              Thread.sleep(50)
+            }
+          } 
         } match {
           case Success(_) =>
           case Failure(e) =>
@@ -435,7 +552,7 @@ object Main {
         Thread.sleep(1000)
       }
     }
-  }
+  }(autoFacingForkjoinPool)
 
   def startRotationBot(implicit team: Team) = Future {
     while (!stop) {
@@ -475,7 +592,7 @@ object Main {
                 }
               }
           }
-          Await.result(actionFutures, 5.seconds)
+          Await.result(actionFutures, 25.seconds)
 
           Thread.sleep(Configuration.PauseBetweenActions.toMillis)
         } match {
@@ -488,7 +605,7 @@ object Main {
         Thread.sleep(1000)
       }
     }
-  }
+  }(rotationForkjoinPool)
 
   def saveImage(imageName: String, image: BufferedImage) = {
     val outputfile = new File(s"$imageName.jpg")

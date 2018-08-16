@@ -30,6 +30,8 @@ case class HunterBM(
       case _ =>
     }
     
+    val meHealth = Player.getHealthPercentage
+    
     val tank = team
       .players
       .find { 
@@ -45,11 +47,12 @@ case class HunterBM(
     //println("can revive " + Player.canCast(RevivePet))
     //println("getEnnemiesCountInRange " + Player.getEnnemiesCountInRange)
     //println("areNameplatesOn " + Player.areNameplatesOn)
-    
+    //println(me.name + " Player.canCast(PrimalRage) " + Player.canCast(PrimalRage) + " Player.hasDebuff(Fatigued) " + Player.hasDebuff(Fatigued))
+      
     val canCastExhilaration = Player.canCast(Exhilaration)
     val canCastAspectOfTheTurtle = Player.canCast(AspectOfTheTurtle)
     
-    if (Player.isInCombat(tank)) {
+    if (meHealth > 1 && Player.isInCombat(tank)) {
       if (Pet.getHealthPercentage == 0 && Player.canCast(RevivePet)) {
         sendAction(RevivePet -> None)
       } else if (
@@ -63,7 +66,7 @@ case class HunterBM(
         }
       } else if (Target.canInterruptAsTeam) {
         sendAction(CounterShot -> None)
-      } else if (Player.canCast(PrimalRage)) {
+      } else if (Player.canCast(PrimalRage) && !Player.hasDebuff(Fatigued)) {
         sendAction(PrimalRage -> None)
       } else if (Player.canCast(BestialWrath)) {
         sendAction(BestialWrath -> None)

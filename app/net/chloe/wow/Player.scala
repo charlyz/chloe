@@ -32,10 +32,14 @@ import net.chloe.win32.Memory
 import net.chloe.win32.Implicits._
 import net.chloe.Configuration.Offsets
 import scala.collection.BitSet
+import scala.collection.mutable.{Set => MSet}
 import scala.concurrent._
+import scala.io.Source
 
 object Player {
   
+  val futurePlayerLocations = MSet[(Float, Float, Float)]()
+
   def getUnitNameLookup(
     guidToPlayerName: Map[String, String] = Map(),
     nextEntryOpt: Option[Long] = None,
@@ -129,12 +133,14 @@ object Player {
   }
   
   def findSafeSpot(
-    x: Float,
-    y: Float,
-    z: Float,
+    playerX: Float,
+    playerY: Float,
+    playerZ: Float,
+    playerAngle: Float,
     waypoints: Set[(Float, Float, Float)],
     harmfulAoes: List[AreaTriggerEntity],
-    tries: Int = 0
+    tries: Int = 0,
+    bestSafeSpotOpt: Option[(Long, Float, (Float, Float, Float))] // (attempts, angle, (x, y, x))
   )(
     implicit player: WowClass
   ): Option[(Float, Float, Float)] = {
@@ -146,52 +152,149 @@ object Player {
           //println((newX, newY, newZ) + " - " + waypoints.size)
           val harmfulAoesDamagingPlayers = harmfulAoes
             .filter { areaTriggerEntity => 
-              Player.isInAoe(x, y, areaTriggerEntity)(player)
+              Player.isInAoe(playerX, playerY, areaTriggerEntity)(player)
             }
           
-          println("player " + player.name)
-          println("harmfulAoes " + harmfulAoes)
-          println("harmfulAoesDamagingPlayers " + harmfulAoesDamagingPlayers)
+          val harmfulAoesDamagingPlayersAtSafePoint = harmfulAoes
+            .filter { areaTriggerEntity => 
+              Player.isInAoe(newX, newY, areaTriggerEntity)(player)
+            }
           
-          val isSafeSpot = harmfulAoesDamagingPlayers
+          val (currentInnerAngle, _, _) = getInnerAndOuterAngles(
+            playerX,
+            newX,
+            playerY,
+            newY,
+            playerZ,
+            newZ,
+            playerAngle
+          )
+
+          //println("player " + player.name)
+          //println("harmfulAoes " + harmfulAoes)
+          //println("harmfulAoesDamagingPlayers " + (harmfulAoesDamagingPlayers ++ harmfulAoesDamagingPlayersAtSafePoint))
+          
+          val isNotSafeSpot = (harmfulAoesDamagingPlayers ++ harmfulAoesDamagingPlayersAtSafePoint)
             .find { harmfulAoeDamagingPlayers =>
-              val distanceBetweenAoeAndSafePoint = getDistanceBetween3DPoints(
-                harmfulAoeDamagingPlayers.x, 
-                newX, 
-                harmfulAoeDamagingPlayers.y, 
-                newY,
-                harmfulAoeDamagingPlayers.z,
-                newZ
-              )
-    
-              val distanceToHarmfulAoe = getDistanceBetween3DPoints(
-                x, 
-                harmfulAoeDamagingPlayers.x, 
-                y, 
-                harmfulAoeDamagingPlayers.y,
-                z,
-                harmfulAoeDamagingPlayers.z
-              )
-    
-              if (
-                harmfulAoeDamagingPlayers.radius + 1 < distanceBetweenAoeAndSafePoint && 
-                distanceBetweenAoeAndSafePoint < harmfulAoeDamagingPlayers.radius + 3
-              ) {
-                //println(s"d $distanceToNewLocation - harmfulAoe.radius ${harmfulAoe.radius}")
-                //println("found it " + Some(newX, newY))
-                println(s"${player.name} is in AOE ${harmfulAoeDamagingPlayers.id}")
-                true
-              } else {
-                false
-              }  
+              harmfulAoeDamagingPlayers.safeSpotsOpt match {
+                case Some(safeSpots) =>
+                  if (safeSpots.contains((newX, newY, newZ))) {
+                    false
+                  } else {
+                    true
+                  }
+                case _ =>
+                  val distanceBetweenAoeAndSafePoint = getDistanceBetween3DPoints(
+                    harmfulAoeDamagingPlayers.x, 
+                    newX, 
+                    harmfulAoeDamagingPlayers.y, 
+                    newY,
+                    harmfulAoeDamagingPlayers.z,
+                    newZ
+                  )
+                  
+                  if (
+                    harmfulAoeDamagingPlayers.radius + 1 < distanceBetweenAoeAndSafePoint && 
+                    distanceBetweenAoeAndSafePoint < harmfulAoeDamagingPlayers.radius + 20
+                  ) {
+                    //println(s"d $distanceToNewLocation - harmfulAoe.radius ${harmfulAoe.radius}")
+                    //println("found it " + Some(newX, newY))
+                    //println(s"${player.name} is NOT in AOE ${harmfulAoeDamagingPlayers.id}")
+                    false
+                  } else {
+                    true
+                  }  
+              }
             }
             .isDefined
-            
-          if (isSafeSpot) {
-            println(s"${player.name} is in AOE ${harmfulAoesDamagingPlayers.map(_.id)}")
-            Some((newX, newY, newZ))
+          //println("player " + player.name + " - isNotSafeSpot " + isNotSafeSpot)
+          if (isNotSafeSpot) {
+            findSafeSpot(
+              playerX, 
+              playerY, 
+              playerZ, 
+              playerAngle, 
+              waypoints.tail, 
+              harmfulAoes, 
+              tries + 1, 
+              bestSafeSpotOpt
+            ) 
           } else {
-            findSafeSpot(x, y, z, waypoints.tail, harmfulAoes, tries + 1)
+            bestSafeSpotOpt match {
+              case Some((attempts, oldAngle, (oldSafeSpotX, oldSafeSpotY, oldSafeSpotZ))) =>
+                val distanceBetweenToonAndOldSafeSpot = getDistanceBetween3DPoints(
+                  playerX, 
+                  oldSafeSpotX, 
+                  playerY, 
+                  oldSafeSpotY,
+                  playerZ,
+                  oldSafeSpotZ
+                )
+                
+                val distanceBetweenToonAndCurrentSafeSpot = getDistanceBetween3DPoints(
+                  playerX, 
+                  newX, 
+                  playerY, 
+                  newY,
+                  playerZ,
+                  newZ
+                )
+
+                val (oldInnerAngle, _, _) = getInnerAndOuterAngles(
+                  playerX,
+                  oldSafeSpotX,
+                  playerY,
+                  oldSafeSpotY,
+                  playerZ,
+                  oldSafeSpotZ,
+                  playerAngle
+                )
+                
+                val newBestSafeSpot = if (
+                  distanceBetweenToonAndOldSafeSpot < distanceBetweenToonAndCurrentSafeSpot && 
+                  oldInnerAngle < currentInnerAngle
+                ) {
+                  (oldSafeSpotX, oldSafeSpotY, oldSafeSpotZ)
+                } else if (
+                  distanceBetweenToonAndOldSafeSpot > distanceBetweenToonAndCurrentSafeSpot && 
+                  distanceBetweenToonAndOldSafeSpot - distanceBetweenToonAndCurrentSafeSpot < 3 &&
+                  oldInnerAngle < currentInnerAngle
+                ) {
+                  (oldSafeSpotX, oldSafeSpotY, oldSafeSpotZ)
+                } else {
+                  (newX, newY, newZ)
+                }
+                
+                if (attempts >= 30) {
+                  Some(newBestSafeSpot)
+                } else {
+                  val newBestSafeSpotOpt = Some((attempts + 1, oldInnerAngle, newBestSafeSpot))
+                  
+                  findSafeSpot(
+                    playerX, 
+                    playerY, 
+                    playerZ, 
+                    playerAngle,
+                    waypoints.tail, 
+                    harmfulAoes, 
+                    tries + 1, 
+                    newBestSafeSpotOpt
+                  )
+                }
+              case _ =>
+                val newBestSafeSpotOpt = Some((1l, currentInnerAngle, (newX, newY, newZ)))
+                
+                findSafeSpot(
+                  playerX, 
+                  playerY, 
+                  playerZ, 
+                  playerAngle,
+                  waypoints.tail, 
+                  harmfulAoes, 
+                  tries + 1, 
+                  newBestSafeSpotOpt
+                )
+            }
           }
         case _ => None
       }
@@ -212,7 +315,7 @@ object Player {
       playerEntity.z,
       targetZ
     )
-    
+    println(player.name + " in runtopoint")
     if (distanceToTarget < 2) {
       true
     } else {
@@ -220,8 +323,14 @@ object Player {
     
       println(s"${player.name} isFacingTarget: $isFacingTarget - distanceToTarget: $distanceToTarget - $targetX - $targetY - $targetZ")
       if (isFacingTarget && distanceToTarget >= 2) {
+        futurePlayerLocations.synchronized {
+          futurePlayerLocations.add((targetX, targetY, targetZ))
+        }
         val runningDuration = ((distanceToTarget / 7) * 1000).milliseconds
         Wow.pressAndReleaseKeystroke(Keys.Up, runningDuration)
+        futurePlayerLocations.synchronized {
+          futurePlayerLocations.remove((targetX, targetY, targetZ))
+        }
         false
       } else if (distanceToTarget >= 2) {
         false
@@ -230,15 +339,18 @@ object Player {
       }
     }
   }
-
-  def facePoint(
-    playerEntity: PlayerEntity,
+  
+  def getInnerAndOuterAngles(
+    playerX: Float,
     targetX: Float,
+    playerY: Float,
     targetY: Float,
-    targetZ: Float
-  )(implicit player: WowClass) = {
-    val diffX = targetX - playerEntity.x
-    val diffY = targetY - playerEntity.y
+    playerZ: Float,
+    targetZ: Float,
+    playerAngle: Float
+  ) = {
+    val diffX = targetX - playerX
+    val diffY = targetY - playerY
     val facingAngle = Math.atan2(diffY, diffX)
     
     val normalizedFacingAngle = if (facingAngle < 0) {
@@ -250,21 +362,38 @@ object Player {
     }
  
     val (minFacingAngle, maxFacingAngle) =
-      if (normalizedFacingAngle > playerEntity.angle) {
-        (playerEntity.angle, normalizedFacingAngle)
+      if (normalizedFacingAngle > playerAngle) {
+        (playerAngle, normalizedFacingAngle)
       } else {
-        (normalizedFacingAngle, playerEntity.angle)
+        (normalizedFacingAngle, playerAngle)
       }
 
     val innerAngle = maxFacingAngle - minFacingAngle
-    val outerAngle = (2 * Math.PI - maxFacingAngle) + minFacingAngle
+    val outerAngle = (2 * Math.PI - maxFacingAngle).toFloat + minFacingAngle
+    
+    (innerAngle, outerAngle, normalizedFacingAngle)
+  }
 
+  def facePoint(
+    playerEntity: PlayerEntity,
+    targetX: Float,
+    targetY: Float,
+    targetZ: Float
+  )(implicit player: WowClass) = {
+    val (innerAngle, outerAngle, normalizedFacingAngle) = getInnerAndOuterAngles(
+      playerEntity.x,
+      targetX,
+      playerEntity.y,
+      targetY,
+      playerEntity.z,
+      targetZ,
+      playerEntity.angle
+    )
     if (innerAngle < 0.3) {
       true
-    } else {                       
+    } else {        
       if (innerAngle < outerAngle) {
         val turnDuration = ((innerAngle / (2 * Math.PI)) * 2000).milliseconds
-    
         if (normalizedFacingAngle < playerEntity.angle) {
           Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
         } else {
@@ -272,14 +401,13 @@ object Player {
         }
       } else {
         val turnDuration = ((outerAngle / (2 * Math.PI)) * 2000).milliseconds
-    
         if (normalizedFacingAngle < playerEntity.angle) {
-          Wow.pressAndReleaseKeystroke(Keys.Left)
+          Wow.pressAndReleaseKeystroke(Keys.Left, turnDuration)
         } else {
-          Wow.pressAndReleaseKeystroke(Keys.Right)
+          Wow.pressAndReleaseKeystroke(Keys.Right, turnDuration)
         }
       }
-      false
+      true
     }
   }
   
@@ -300,7 +428,7 @@ object Player {
     implicit player: WowClass
   ): Boolean = {
     val d = getDistanceBetween2DPoints(x, areaTriggerEntity.x, y, areaTriggerEntity.y)
-    println(s"""
+    /*println(s"""
       
       name: ${player.name}
       x: $x
@@ -308,7 +436,7 @@ object Player {
       areaTriggerEntity.x : ${areaTriggerEntity.x}
       areaTriggerEntity.y: ${areaTriggerEntity.y}
       
-      """)
+      """)*/
     d < areaTriggerEntity.radius + 1
   }
   
@@ -316,18 +444,18 @@ object Player {
     guidToPlayerName: Map[String, String] = Map(),
     nameToPlayerEntity: Map[String, PlayerEntity] = Map(),
     areaTriggerEntities: List[AreaTriggerEntity] = List(),
-    guidToEntityLocation: Map[String, EntityLocation] = Map(),
+    guidToUnit: Map[String, WowUnit] = Map(),
     nextEntryOpt: Option[Long] = None,
     currentIteration: Int = 0,
     previousEntries: Set[Long] = Set()
   )(
     implicit player: WowClass
-  ): (Map[String, PlayerEntity], List[AreaTriggerEntity], Map[String, EntityLocation]) = {
+  ): (Map[String, PlayerEntity], List[AreaTriggerEntity], Map[String, WowUnit]) = {
     val hProcess = player.hProcess
     val baseAddress = player.baseAddress
     
     if (currentIteration > 20000) {
-      (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+      (nameToPlayerEntity, areaTriggerEntities, guidToUnit)
     } else {
       val foundGUIDToPlayerName = if (guidToPlayerName.isEmpty) {
         getUnitNameLookup()
@@ -348,9 +476,9 @@ object Player {
       }
 
       if (previousEntries.contains(nextEntry)) {
-        (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+        (nameToPlayerEntity, areaTriggerEntities, guidToUnit)
       } else if (nextEntry <= 0 || nextEntry == Long.MaxValue) {
-        (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+        (nameToPlayerEntity, areaTriggerEntities, guidToUnit)
       } else {
         val entryType = Memory.readByte(
           hProcess, nextEntry + Offsets.EntitiesList.Entry.Type
@@ -363,7 +491,7 @@ object Player {
         val nextNextEntry: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NextEntry)
         
         if (descriptors > 0) {  
-          val (newNameToPlayerEntity, newAreaTriggerEntities, newGUIDToEntityLocation) = entryType match {
+          val (newNameToPlayerEntity, newAreaTriggerEntities, newGUIDToUnit) = entryType match {
             case Configuration.ObjectTypes.NPC =>
               val xAddress = nextEntry + Offsets.EntitiesList.Unit.X
               val yAddress = nextEntry + Offsets.EntitiesList.Unit.Y
@@ -374,21 +502,44 @@ object Player {
               val npcName1: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NPC.Name1)
               val npcName2: Long = Memory.readPointer(hProcess, npcName1 + Offsets.EntitiesList.NPC.Name2)
               val guid = Memory.readGUID(hProcess, nextEntry + Offsets.EntitiesList.Entry.GUID)
+              val castingSpellId = Memory.readInt(hProcess, nextEntry + Offsets.EntitiesList.Unit.CastingSpellId)
               val nameOpt = Memory.readStringOpt(hProcess, npcName2)
               //println("NPC: " + Memory.readStringOpt(hProcess, npcName2) + s" - x $x - y $y - z $z")
               
+              val targetBase: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.Unit.Target1)
+              val targetGUID = Memory.readGUID(hProcess, targetBase + Offsets.EntitiesList.Unit.Target2)
+       
               nameOpt match {
                 case Some(foundName) =>
+                  
+                  if (foundName == "Hymdall") {
+                    //println("hymdall is casting " + castingSpellId)
+                  }
+                  
+                  val newNPCEntity = NPCEntity(
+                    x, 
+                    y, 
+                    z, 
+                    xAddress, 
+                    yAddress, 
+                    zAddress, 
+                    guid, 
+                    foundName, 
+                    castingSpellId, 
+                    targetGUID,
+                    nextEntry
+                  )
+                  
                   (
                     nameToPlayerEntity,
                     areaTriggerEntities,
-                    guidToEntityLocation + (guid -> NPCEntity(x, y, z, xAddress, yAddress, zAddress, guid, foundName))
+                    guidToUnit + (guid -> newNPCEntity)
                   )
                 case _ =>
                   (
                     nameToPlayerEntity,
                     areaTriggerEntities,
-                    guidToEntityLocation
+                    guidToUnit
                   )
               }
             case 
@@ -412,7 +563,8 @@ object Player {
               val z = Memory.readFloat(hProcess, zAddress)
               val angleAddress = nextEntry + Offsets.EntitiesList.Unit.Angle
               val angle = Memory.readFloat(hProcess, angleAddress)
-
+              val castingSpellId = Memory.readInt(hProcess, nextEntry + Offsets.EntitiesList.Unit.CastingSpellId)
+              
               val nameOpt = if (entryType == Configuration.ObjectTypes.NPC) {
                 val npcName1: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.NPC.Name1)
                 val npcName2: Long = Memory.readPointer(hProcess, npcName1 + Offsets.EntitiesList.NPC.Name2)
@@ -421,17 +573,20 @@ object Player {
                 foundGUIDToPlayerName.get(guid)
               }
               
-              val (targetNameOpt, targetGUIDOpt) = if (
-                entryType == Configuration.ObjectTypes.Player ||
-                entryType == Configuration.ObjectTypes.LocalPlayer
-              ) {
-                val targetBase: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.Player.Target1)
-                val targetGUID = Memory.readGUID(hProcess, targetBase + Offsets.EntitiesList.Player.Target2)
-                (foundGUIDToPlayerName.get(targetGUID), Some(targetGUID))
-              } else {
-                (None, None)
-              }
-
+              /*var i = 0
+              while (i < 10000) {
+                val e = Memory.readInt(hProcess, nextEntry + i)
+                if (e == 212040 ) {
+                  println(s"${player.name} found revitalize for $nameOpt at offset $i")
+                }
+              
+                i = i+1
+              }*/
+              
+              val targetBase: Long = Memory.readPointer(hProcess, nextEntry + Offsets.EntitiesList.Unit.Target1)
+              val targetGUID = Memory.readGUID(hProcess, targetBase + Offsets.EntitiesList.Unit.Target2)
+              val targetNameOpt = foundGUIDToPlayerName.get(targetGUID)
+              
               nameOpt match {
                 case Some(foundName) =>
                   val shouldAddPlayerEntity = nameToPlayerEntity.get(foundName) match {
@@ -456,24 +611,25 @@ object Player {
                       guid, 
                       foundName, 
                       targetNameOpt, 
-                      targetGUIDOpt,
-                      nextEntry
+                      targetGUID,
+                      nextEntry,
+                      castingSpellId
                     )
                     
                     (
                       nameToPlayerEntity + (foundName -> newPlayerEntity),
                       areaTriggerEntities, 
-                      guidToEntityLocation + (guid -> newPlayerEntity)
+                      guidToUnit + (guid -> newPlayerEntity)
                     )
                   } else {
-                    (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+                    (nameToPlayerEntity, areaTriggerEntities, guidToUnit)
                   }
-                case _ => (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+                case _ => (nameToPlayerEntity, areaTriggerEntities, guidToUnit)
               }
             case 9 => 
               println("found dynamic")
               
-              (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+              (nameToPlayerEntity, areaTriggerEntities, guidToUnit)
             case 11 => 
               val spellIdX = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.AreaTrigger.X)
               val spellIdY = Memory.readFloat(hProcess, nextEntry + Offsets.EntitiesList.AreaTrigger.Y)
@@ -487,6 +643,9 @@ object Player {
                 hProcess, nextEntry + Offsets.EntitiesList.AreaTrigger.Base + Offsets.EntitiesList.AreaTrigger.Radius
               )
               
+              //println(s"spellId $spellId - radius $radius")
+              //println(s"spellIdX $spellIdX spellIdY $spellIdY spellIdZ $spellIdZ")
+                
               /*if (spellId == 198895) {
                 println(s"spellId $spellId - radius $radius")
                 println(s"spellIdX $spellIdX spellIdY $spellIdY spellIdZ $spellIdZ")
@@ -507,20 +666,20 @@ object Player {
                 (
                   nameToPlayerEntity, 
                   AreaTriggerEntity(spellId, radius, spellIdX, spellIdY, spellIdZ) +: areaTriggerEntities, 
-                  guidToEntityLocation
+                  guidToUnit
                 )
               } else {
-                (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+                (nameToPlayerEntity, areaTriggerEntities, guidToUnit)
               }
             case _ => 
-              (nameToPlayerEntity, areaTriggerEntities, guidToEntityLocation)
+              (nameToPlayerEntity, areaTriggerEntities, guidToUnit)
           }
           
           getEntities(
             foundGUIDToPlayerName,
             newNameToPlayerEntity,
             newAreaTriggerEntities,
-            newGUIDToEntityLocation,
+            newGUIDToUnit,
             Some(nextNextEntry),
             currentIteration + 1,
             previousEntries + nextEntry
@@ -530,7 +689,7 @@ object Player {
             guidToPlayerName,
             nameToPlayerEntity,
             areaTriggerEntities,
-            guidToEntityLocation,
+            guidToUnit,
             Some(nextNextEntry),
             currentIteration + 1,
             previousEntries + nextEntry

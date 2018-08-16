@@ -8,5 +8,8 @@ case class NPCEntity(
   val yAddress: Long,
   val zAddress: Long,
   val guid: String,
-  val name: String
-) extends EntityLocation
+  val name: String,
+  val castingSpellId: Int,
+  val targetGUID: String,
+  val entryBase: Long
+) extends WowUnit

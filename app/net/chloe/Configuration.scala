@@ -21,17 +21,24 @@ object Configuration {
     val Player = 6
     val LocalPlayer = 7
   }
+  
+  object CastingSpells {
+    val DancingBlade = 193235
+    val HornOfValor = 191284
+  }
  
   object Aoes {
     val FreezingTrap = 187651
     val Flare = 132950
     val TarTrap = 187699
-    val DancingBlade = 193233
-    val CracklingStorm = 198895
+    val DancingBlade = 193214
+    val CracklingStorm = 198892
+    val Thunderstrike = 198605
   }
   
   object HydridNPCsAreaTriggers {
     val CracklingStorm = "Crackling Storm"
+    val DancingBlade = "Dancing Blade"
   }
   
   val HarmfulAoes = List(
@@ -98,16 +105,17 @@ object Configuration {
         val Y = 0x158C
         val Z = 0x1590
         val Angle = 0x1598
+        val CastingSpellId = 0x18F8
+        val Target1 = 0x10
+        val Target2 = 0x9C
       }
       
       object NPC {
-        val Name1 = 0xC68
-        val Name2 = 0x080
+        val Name1 = 0x1740 
+        val Name2 = 0xE0
       }
       
       object Player {
-        val Target1 = 0x10
-        val Target2 = 0x9C
         val UnitSpeed1 = 0x198
         val UnitSpeed2 = 0xA4  
       }

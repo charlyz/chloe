@@ -5,5 +5,6 @@ case class AreaTriggerEntity(
   val radius: Float,
   val x: Float,
   val y: Float,
-  val z: Float
+  val z: Float,
+  val safeSpotsOpt: Option[Set[(Float, Float, Float)]] = None
 )

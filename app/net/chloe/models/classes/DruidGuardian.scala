@@ -35,9 +35,11 @@ case class DruidGuardian(
     //println("!Player.getBuffRemainingTimeOpt(Ironfur).isDefined " + !Player.getBuffRemainingTimeOpt(Ironfur).isDefined)
     //println("Player.hasBuff(BearForm) " + Player.hasBuff(BearForm))
     
-    if (!Player.hasBuff(BearForm) && Player.canCast(BearForm)) {
+    val meHealth = Player.getHealthPercentage
+    
+    if (meHealth > 1 && !Player.hasBuff(BearForm) && Player.canCast(BearForm)) {
       sendAction(BearForm -> None)
-    } else if (Player.isInCombat) {
+    } else if (meHealth > 1 && Player.isInCombat) {
       val canCastBarkskin = Player.canCast(GuardianBarkskin)
       val canCastSurvivalInstincts = Player.canCast(SurvivalInstincts) && 
         !Player.getBuffRemainingTimeOpt(FrenziedRegeneration).isDefined
@@ -65,6 +67,8 @@ case class DruidGuardian(
         } else if (canCastFrenziedRegeneration) {
           sendAction(FrenziedRegeneration -> None)
         }
+      } else if (Player.hasBuff(GalacticGuardian)) {
+        sendAction(GuardianMoonfire -> None)
       } else if (Player.hasBuff(Gore)) {
         sendAction(Mangle -> None)
       } else if (Target.canInterruptAsTeam && (canCastMightyBash || canCastSkullBash)) {
