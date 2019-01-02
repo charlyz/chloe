@@ -334,7 +334,7 @@ case class DruidResto(
         
         val canCastRejuvenation = Player.canCast(Rejuvenation)
         val canCastRegrowth = Player.canCast(Regrowth)
-        val canCastFlourish = Player.canCast(Flourish)
+        //val canCastFlourish = Player.canCast(Flourish)
         val canCastLifebloom = Player.canCast(Lifebloom)
         var hotsCount = 0
         
@@ -442,9 +442,9 @@ case class DruidResto(
           }
         }
         
-        if (canCastFlourish && hotsCount > 4) {
-          spellAndTargetToPriority(Flourish -> None) += hotsCount
-        }
+        //if (canCastFlourish && hotsCount > 4) {
+        //  spellAndTargetToPriority(Flourish -> None) += hotsCount
+        //}
          
         //if (canCastHealingTouch) {
         //  spellAndTargetToPriority(HealingTouch -> Some(DpsOne)) += dpsOneHealthWeight

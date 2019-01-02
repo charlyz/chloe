@@ -857,7 +857,7 @@ object Player {
   
   def isSpellOnCooldown(cooldown: Cooldown)(implicit player: WowClass) = {
     val color = Wow.captureColor(column = cooldown.cooldownIndexInAddon, row = 2)
-    
+
     color.red == 0
   }
   
@@ -867,7 +867,7 @@ object Player {
       .isRed
   }
   
-  def getCooldownRemainingTimeOpt(cooldown: Cooldown)(implicit player: WowClass) = {
+  def getCooldownRemainingTimeOpt(cooldown: Cooldown)(implicit player: WowClass): Option[FiniteDuration] = {
     val color = Wow.captureColor(column = cooldown.cooldownIndexInAddon, row = 2)
     
     if (color.red == 255) {

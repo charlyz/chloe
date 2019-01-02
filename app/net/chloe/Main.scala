@@ -85,17 +85,15 @@ object Main {
     .toSet ++ hovStaticFieldSafeSpots
       
   def main(args: Array[String]) = {
-    val hWowWindows = Wow.getWindows("Ultimate")
+    val hWowWindows = Wow.getWindows("MegaBurst")
  
     val players: Map[SpellTargetType, WowClass] = hWowWindows
       .flatMap { hWowWindow =>
         val title = Wow.getWindowTitleImpl(hWowWindow)
-
         if (title.contains("Ditto")) {
           None
-        } else if (title.contains("Rooke")) {
+        } /*else if (title.contains("Rooke")) {
           val player = DruidResto(
-              
             name = "Rooke",
             hWowWindow,
             Healer
@@ -109,9 +107,9 @@ object Main {
           //println("tadam: " + Memory.readStringOpt(hProcess, baseAddress + Configuration.Offsets.PlayerName))
           val locations = Player.getEntities()(player)
           println(locations)
-          //println("asdfasdf")
-          //val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
-          //saveImage("bla"+UUID.randomUUID(), a)
+          println("asdfasdf")
+          val a = Wow.capture(Some(500), Some(900), Some(6), Some(6))(player)
+          saveImage("bla"+UUID.randomUUID(), a)
           
           /*var i = 45500000
           Thread.sleep(10000)
@@ -137,6 +135,14 @@ object Main {
           println("end")*/
 
           Some(Healer -> player)
+        }*/ else if (title.contains("Clala")) {
+          val player = HunterBM(
+            name = "Clala",
+            hWowWindow,
+            DpsFour
+          )
+          
+          Some(DpsFour -> player)
         } else if (title.contains("Monria")) {
           val player = HunterBM(
             name = "Monria",
@@ -161,14 +167,14 @@ object Main {
           )
           
           Some(DpsThree -> player)
-        } else if (title.contains("Cayla")) {
-          val player = DruidGuardian(
-            name = "Cayla",
+        } else if (title.contains("Feathe")) {
+          val player = HunterBM(
+            name = "Feathe",
             hWowWindow,
-            Tank
+            DpsFive
           )
           
-          Some(Tank -> player)
+          Some(DpsFive -> player)
         } else {
           None
         }
@@ -179,17 +185,17 @@ object Main {
 
     if (team.players.size == 5) {
       //refreshUnitLocationsForever(team)
-      mouseHookStartStop(team)
-      keyboardHookStartStop()
+      //mouseHookStartStop(team)
+      keyboardHookStartStop(team)
       
-      val autoFacingFutures = team.players
+      /*val autoFacingFutures = team.players
         .map { case (_, player) =>
           startAutoFacingBot(waypoints, team)(player)
         }
-        .toList
+        .toList*/
       
       Await.result(
-        Future.sequence(startRotationBot +: autoFacingFutures), 
+        startRotationBot,//Future.sequence(startRotationBot +: autoFacingFutures), 
         Duration.Inf
       )
       ()
@@ -247,7 +253,7 @@ object Main {
     }
   }
   
-  def keyboardHookStartStop() = {
+  def keyboardHookStartStop(team: Team) = {
     Future {
       blocking {
         var hhk: HHOOK = null
@@ -260,10 +266,24 @@ object Main {
                   if (info.vkCode == Keys.D1) {
                     combatRotationRunning = !combatRotationRunning
                     //autoFacingBotRunning = !autoFacingBotRunning
+                    team.players.foreach { 
+                      case (spellTargetType, player) if player.isInstanceOf[HunterBM] =>
+                        if (!combatRotationRunning) {
+                          // Put pet in passive mode.
+                          Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.F6))(player)
+                          Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.F6))(player)
+                          Wow.pressAndReleaseKeystrokes(List(Keys.Alt, Keys.F6))(player)
+                        } else {
+                          // Put pet in assist mode.
+                          Wow.pressAndReleaseKeystrokes(List(Keys.LShiftKey, Keys.T))(player)
+                        }
+                      case _ =>
+                    }
+                    
                     Logger.info(s"Combat rotation running: $combatRotationRunning")
                   } else if (info.vkCode == Keys.T) {
-                    autoFacingBotRunning = !autoFacingBotRunning
-                    Logger.info(s"Auto-facing bot running: $autoFacingBotRunning")
+                    //autoFacingBotRunning = !autoFacingBotRunning
+                    //Logger.info(s"Auto-facing bot running: $autoFacingBotRunning")
                   }
                 case _ =>
               }
