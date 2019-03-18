@@ -9,10 +9,10 @@ object Configuration {
   val SlaveWindowWith = 960
   val PrimaryWindowWith = 3840
   val MinimumTimeBetweenInterrupt = 2.seconds
-  val PauseBetweenActions = 50.millis//2.seconds//200.millis
+  val PauseBetweenActions = 250.millis//2.seconds//200.millis
   
   val CriticalHealthThreshold = 40
-  val MajorHealthThreshold = 70
+  val MajorHealthThreshold = 80
   val FullHealthThreshold = 95
   
   object ObjectTypes {

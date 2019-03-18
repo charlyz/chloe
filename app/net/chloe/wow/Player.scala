@@ -861,12 +861,6 @@ object Player {
     color.red == 0
   }
   
-  def isSpellOnGcd(cooldown: Cooldown)(implicit player: WowClass) = {
-    Wow
-      .captureColor(column = cooldown.cooldownIndexInAddon, row = 2)
-      .isRed
-  }
-  
   def getCooldownRemainingTimeOpt(cooldown: Cooldown)(implicit player: WowClass): Option[FiniteDuration] = {
     val color = Wow.captureColor(column = cooldown.cooldownIndexInAddon, row = 2)
     
@@ -923,7 +917,19 @@ object Player {
     } 
     
     val isSpellOnCooldownCheck = if (cooldown.hasCooldownOtherThanGcd) {
-      !isSpellOnCooldown(cooldown)
+      if (cooldown.hasCharges) {
+        hasChargesCheck
+      } else {
+        getCooldownRemainingTimeOpt(cooldown) match {
+          case Some(cooldownRemainingTime) => 
+            if (cooldown.hasCooldownOtherThanGcd) {
+              cooldownRemainingTime < 0.5.seconds
+            } else {
+              true
+            }
+          case _ => true
+        }
+      }
     } else {
       true
     } 
@@ -940,7 +946,6 @@ object Player {
       needTargetCheck &&
       hasChargesCheck && 
       needTargetCheck &&
-      !isSpellOnGcd(cooldown) && 
       isMovingCheck
   }
   

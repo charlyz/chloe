@@ -64,6 +64,8 @@ object Main {
 
   @volatile var combatRotationRunning = false
   @volatile var autoFacingBotRunning = false
+  @volatile var autoFollowingRunning = false
+  @volatile var previousAutoFollowingRunning = false
   @volatile var stop = false
   val playerToLocationsLookup: MMap[WowClass, Map[String, PlayerEntity]] = MMap()
   val write = new PrintWriter(new FileOutputStream(new File("hov-static-fields-safe-spots.txt"), true))
@@ -139,10 +141,10 @@ object Main {
           val player = HunterBM(
             name = "Clala",
             hWowWindow,
-            DpsFour
+            HealerTwo
           )
           
-          Some(DpsFour -> player)
+          Some(HealerTwo -> player)
         } else if (title.contains("Monria")) {
           val player = HunterBM(
             name = "Monria",
@@ -171,10 +173,10 @@ object Main {
           val player = HunterBM(
             name = "Feathe",
             hWowWindow,
-            DpsFive
+            Healer
           )
           
-          Some(DpsFive -> player)
+          Some(Healer -> player)
         } else {
           None
         }
@@ -185,9 +187,10 @@ object Main {
 
     if (team.players.size == 5) {
       //refreshUnitLocationsForever(team)
-      //mouseHookStartStop(team)
+      mouseHookStartStop(team)
       keyboardHookStartStop(team)
-      
+      //autoAssist(team)
+      //autoFollow(team)
       /*val autoFacingFutures = team.players
         .map { case (_, player) =>
           startAutoFacingBot(waypoints, team)(player)
@@ -201,6 +204,56 @@ object Main {
       ()
     } else {
       Logger.info("Team not found.")
+    }
+  }
+    
+  def autoAssist(team: Team): Unit = {
+    val actorSystem = ActorSystem()
+    val scheduler = actorSystem.scheduler
+
+    val assistFutures = Future.traverse(team.players) { case (_, player) =>
+      Future {
+        blocking {
+          if (Player.isPrimary(player)) {
+            Wow.mouse4Click(player)
+          }
+        }
+      }
+    }
+    
+    Await.result(assistFutures, 5.seconds)
+    
+    scheduler.scheduleOnce(3.seconds) {
+      autoAssist(team)
+    }
+  }
+  
+  def autoFollow(team: Team): Unit = {
+    val actorSystem = ActorSystem()
+    val scheduler = actorSystem.scheduler
+
+    val followingFutures = Future.traverse(team.players) { case (_, player) =>
+      Future {
+        blocking {
+          if (autoFollowingRunning) {
+            if (Player.isPrimary(player)) {
+              Wow.mouse5Click(player)
+            }
+          } else {
+            if (previousAutoFollowingRunning && !Player.isPrimary(player)) {
+              Wow.pressAndReleaseKeystrokes(List(Keys.S))(player)
+              Wow.pressAndReleaseKeystrokes(List(Keys.S))(player)
+              Wow.pressAndReleaseKeystrokes(List(Keys.S))(player)
+            }
+          }
+        }
+      }
+    }
+    
+    Await.result(followingFutures, 5.seconds)
+    previousAutoFollowingRunning = autoFollowingRunning
+    scheduler.scheduleOnce(1.second) {
+      autoFollow(team)
     }
   }
 
@@ -239,7 +292,12 @@ object Main {
           def callback(nCode: Int, wParam: WPARAM, info: MSLLHOOKSTRUCT): LRESULT = {
             if (nCode >= 0) {
               wParam.intValue() match {
-               case MouseActions.WM_LBUTTONDOWN => Wow.clickToMoveSlaves(team)
+               case MouseActions.WM_LBUTTONDOWN => //Wow.clickToMoveSlaves(team)
+               case MouseActions.WM_XBUTTONDOWN =>
+                 val buttonPressed = ((info.mouseData >> 16) & 0xffff)
+                 if (buttonPressed == 0x0002) {
+                   autoFollowingRunning = !autoFollowingRunning
+                 }
                case _ =>
               }
             }

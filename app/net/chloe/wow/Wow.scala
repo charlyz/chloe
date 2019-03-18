@@ -44,6 +44,8 @@ object Wow {
   val WM_RBUTTONDOWN = 0x0204
 	val WM_RBUTTONUP = 0x0205
 	val WM_MOUSEMOVE = 0x0200
+	val WM_XBUTTONDOWN = 0x020B
+	val WM_XBUTTONUP = 0x020C
 	val WM_SETCURSOR = 0x0020
 	val wordShift = 16;
   
@@ -67,6 +69,38 @@ object Wow {
     }    
   }
   
+  def mouse4Click(
+    implicit player: WowClass
+  ) = {
+    mouseXClick(0x0001)
+  }
+  
+  def mouse5Click(
+    implicit player: WowClass
+  ) = {
+    mouseXClick(0x0002)
+  }
+  
+  def mouseXClick(mouseNumber: Int)(
+    implicit player: WowClass
+  ) = {
+    val rct = new RECT()
+
+    if (!User32.GetWindowRect(player.hWindow, rct)) {
+      throw new Exception("Could not get window size.")
+    }
+        
+    val newX = 10 - rct.left
+    val newY = 10 - rct.top
+
+    val lParam = new LPARAM(newX | (newY << wordShift))
+    val wParam = new WPARAM(0 | mouseNumber << wordShift)
+    
+    User32.PostMessage(player.hWindow, WM_MOUSEMOVE, new WPARAM(2), lParam)
+    User32.PostMessage(player.hWindow, WM_XBUTTONDOWN, wParam, lParam)
+    User32.PostMessage(player.hWindow, WM_XBUTTONUP, wParam, lParam)
+  }
+  
   def rightClick(
     x: Int,
     y: Int
@@ -75,8 +109,7 @@ object Wow {
   ) = {
     val rct = new RECT()
 
-    if (!User32.GetWindowRect(player.hWindow, rct))
-    {
+    if (!User32.GetWindowRect(player.hWindow, rct)) {
       throw new Exception("Could not get window size.")
     }
         

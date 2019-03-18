@@ -200,8 +200,18 @@ case class DruidResto(
     val dpsOne = team.getPlayer(DpsOne)
     val dpsTwo = team.getPlayer(DpsTwo)
     val dpsThree = team.getPlayer(DpsThree)
-    val tank = team.getPlayer(Tank)
-    
+    //val tank = team.getPlayer(Tank)
+    val (otherHealerType: SpellTargetType, otherHealer) = team
+      .players
+      .find { 
+        case (Healer, player) if player != me => true
+        case (HealerTwo, player) if player != me => true
+        case _ => false
+      } match {
+        case Some((Healer, player)) => (Healer, player)
+        case Some((HealerTwo, player)) => (HealerTwo, player)
+        case _ => throw new Exception("Missing dps one.")
+      }
     val meHealth = Player.getHealthPercentage
 
     //println("Player.getBuffRemainingTimeOpt(Lifebloom) " + Player.getBuffRemainingTimeOpt(Lifebloom))
@@ -216,10 +226,12 @@ case class DruidResto(
       val dpsOneHealth = Player.getHealthPercentage(dpsOne)
       val dpsTwoHealth = Player.getHealthPercentage(dpsTwo)
       val dpsThreeHealth = Player.getHealthPercentage(dpsThree)
-      val tankHealth = Player.getHealthPercentage(tank)
-      
-      val isInCombat = Player.isInCombat(tank)
-     
+      //val tankHealth = Player.getHealthPercentage(tank)
+      val otherHealerHealth = Player.getHealthPercentage(otherHealer)
+
+      //val isInCombat = Player.isInCombat(tank)
+      val isInCombat = Player.isInCombat(dpsOne)
+       
       val canCastBarkskin = Player.canCast(RestoBarkskin)
       val canCastTranquility = Player.canCast(Tranquility)
       val canCastSwiftmend = Player.canCast(Swiftmend)
@@ -228,38 +240,36 @@ case class DruidResto(
       val canCastRenewal = Player.canCast(Renewal)
       val canCastIronbark = Player.canCast(Ironbark)
       
+      val lowHealthToonsCount = List[Int](meHealth, dpsOneHealth, dpsTwoHealth, dpsThreeHealth, otherHealerHealth)
+        .map { health =>
+          if (health < Configuration.MajorHealthThreshold && health > 1) {
+            1
+          } else {
+            0
+          }
+        }
+        .sum
+      
       if (
-        meHealth < Configuration.MajorHealthThreshold &&
-        dpsOneHealth < Configuration.MajorHealthThreshold && 
-        dpsTwoHealth < Configuration.MajorHealthThreshold &&
-        dpsThreeHealth < Configuration.MajorHealthThreshold && 
-        tankHealth < Configuration.MajorHealthThreshold &&
-        
-        dpsOneHealth > 1 &&
-        meHealth > 1 &&
-        dpsTwoHealth > 1 &&
-        dpsThreeHealth > 1 &&
-        tankHealth > 1 &&
-        
-        canCastWildGrowth &&
+        lowHealthToonsCount > 2 &&
         canCastTranquility &&
         isInCombat
       ) {
-        if (canCastTranquility) {
-          sendAction(Tranquility -> None)
-        } else {
-          sendAction(WildGrowth -> None)
-        }
+        sendAction(Tranquility -> None)
+      } else if (canCastWildGrowth && isInCombat) {
+        sendAction(WildGrowth -> Some(spellTargetType))
       } else if (
-        tankHealth > 1 && 
-        tankHealth < Configuration.CriticalHealthThreshold && 
+        //tankHealth > 1 && 
+        //tankHealth < Configuration.CriticalHealthThreshold && 
+        otherHealerHealth > 1 && 
+        otherHealerHealth < Configuration.CriticalHealthThreshold && 
         isInCombat && 
         (canCastIronbark || canCastSwiftmend)
       ) {
         if (canCastSwiftmend) {
-          sendAction(Swiftmend -> Some(Tank))
+          sendAction(Swiftmend -> Some(otherHealerType))
         } else  {
-          sendAction(Ironbark -> Some(Tank))
+          sendAction(Ironbark -> Some(otherHealerType))
         }
       } else if (
         meHealth > 1 && 
@@ -270,7 +280,7 @@ case class DruidResto(
         if (canCastRenewal) {
           sendAction(Renewal -> None)
         } else if (canCastSwiftmend) {
-          sendAction(Swiftmend -> Some(Healer))
+          sendAction(Swiftmend -> Some(spellTargetType))
         } else if (canCastBarkskin) {
           sendAction(RestoBarkskin -> None)
         }
@@ -300,12 +310,13 @@ case class DruidResto(
         (dpsOneHealth < Configuration.FullHealthThreshold && dpsOneHealth > 1) ||
         (dpsTwoHealth < Configuration.FullHealthThreshold && dpsTwoHealth > 1) ||
         (dpsThreeHealth < Configuration.FullHealthThreshold && dpsThreeHealth > 1) ||
-        (tankHealth < Configuration.FullHealthThreshold && tankHealth > 1)
+        //(tankHealth < Configuration.FullHealthThreshold && tankHealth > 1)
+        (otherHealerHealth < Configuration.FullHealthThreshold && otherHealerHealth > 1)
       ) {
-        val tankHealthWeight = if (tankHealth <= 1 || tankHealth > 99) {
+        val otherHealerHealthWeight = if (otherHealerHealth <= 1 || otherHealerHealth > 99) {
           (-100).toFloat
         } else {
-          1 - tankHealth.toFloat / 100f //+ 0.5f
+          1 - otherHealerHealth.toFloat / 100f //+ 0.5f
         }
 
         val healerHealthWeight = if (meHealth <= 0 || meHealth > 99) {
@@ -338,19 +349,19 @@ case class DruidResto(
         val canCastLifebloom = Player.canCast(Lifebloom)
         var hotsCount = 0
         
-        if (canCastLifebloom && !Player.getBuffRemainingTimeOpt(Lifebloom)(tank).isDefined) {
-          spellAndTargetToPriority(Lifebloom -> Some(Tank)) += 6
+        if (canCastLifebloom && !Player.getBuffRemainingTimeOpt(Lifebloom)(otherHealer).isDefined) {
+          spellAndTargetToPriority(Lifebloom -> Some(otherHealerType)) += 6
         }
         
         if (canCastRejuvenation) {
-          if (!Player.getBuffRemainingTimeOpt(Rejuvenation)(tank).isDefined) {
-            spellAndTargetToPriority(Rejuvenation -> Some(Tank)) += 4 + tankHealthWeight
+          if (!Player.getBuffRemainingTimeOpt(Rejuvenation)(otherHealer).isDefined) {
+            spellAndTargetToPriority(Rejuvenation -> Some(otherHealerType)) += 4 + otherHealerHealthWeight
           } else {
             hotsCount += 1
           }
           
           if (!Player.getBuffRemainingTimeOpt(Rejuvenation).isDefined) {
-            spellAndTargetToPriority(Rejuvenation -> Some(Healer)) += 4 + healerHealthWeight
+            spellAndTargetToPriority(Rejuvenation -> Some(spellTargetType)) += 4 + healerHealthWeight
           } else {
             hotsCount += 1
           }
@@ -373,14 +384,14 @@ case class DruidResto(
             hotsCount += 1
           }
           
-          if (!Player.getBuffRemainingTimeOpt(Germination)(tank).isDefined) {
-            spellAndTargetToPriority(Rejuvenation -> Some(Tank)) += 3 + tankHealthWeight
+          if (!Player.getBuffRemainingTimeOpt(Germination)(otherHealer).isDefined) {
+            spellAndTargetToPriority(Rejuvenation -> Some(otherHealerType)) += 3 + otherHealerHealthWeight
           } else {
             hotsCount += 1
           }
 
           if (!Player.getBuffRemainingTimeOpt(Germination).isDefined) {
-            spellAndTargetToPriority(Rejuvenation -> Some(Healer)) += 3 + healerHealthWeight
+            spellAndTargetToPriority(Rejuvenation -> Some(spellTargetType)) += 3 + healerHealthWeight
           } else {
             hotsCount += 1
           }
@@ -411,14 +422,15 @@ case class DruidResto(
         }
        
         if (canCastRegrowth) {
-          if (!Player.getBuffRemainingTimeOpt(Regrowth)(tank).isDefined) {
-            spellAndTargetToPriority(Regrowth -> Some(Tank)) += 2 + tankHealthWeight + clearcastingWeight
+          if (!Player.getBuffRemainingTimeOpt(Regrowth)(otherHealer).isDefined) {
+            spellAndTargetToPriority(Regrowth -> Some(otherHealerType)) += 
+              2 + otherHealerHealthWeight + clearcastingWeight
           } else {
             hotsCount += 1
           }
           
           if (!Player.getBuffRemainingTimeOpt(Regrowth).isDefined) {
-            spellAndTargetToPriority(Regrowth -> Some(Healer)) += 2 + healerHealthWeight + clearcastingWeight
+            spellAndTargetToPriority(Regrowth -> Some(spellTargetType)) += 2 + healerHealthWeight + clearcastingWeight
           } else {
             hotsCount += 1
           }
@@ -524,14 +536,27 @@ object DruidResto {
     (Efflorescence, Some(DpsThree)) -> List(Keys.Alt, Keys.F6),
     (Ironbark, Some(DpsThree)) -> List(Keys.Alt, Keys.F7),
     
-    (Rejuvenation, Some(Tank)) -> List(Keys.Alt, Keys.D1),
-    (Regrowth, Some(Tank)) -> List(Keys.Alt, Keys.D2),
+    //(Rejuvenation, Some(Tank)) -> List(Keys.Alt, Keys.D1),
+    //(Regrowth, Some(Tank)) -> List(Keys.Alt, Keys.D2),
     //(HealingTouch, Some(Tank)) -> List(Keys.Alt, Keys.D3),
-    (Lifebloom, Some(Tank)) -> List(Keys.Alt, Keys.D4),
-    (Swiftmend, Some(Tank)) -> List(Keys.Alt, Keys.D5),
-    (WildGrowth, Some(Tank)) -> List(Keys.Alt, Keys.D6),
-    (Efflorescence, Some(Tank)) -> List(Keys.Alt, Keys.D7),
-    (Ironbark, Some(Tank)) -> List(Keys.Alt, Keys.D8)
+    //(Lifebloom, Some(Tank)) -> List(Keys.Alt, Keys.D4),
+    //(Swiftmend, Some(Tank)) -> List(Keys.Alt, Keys.D5),
+    //(WildGrowth, Some(Tank)) -> List(Keys.Alt, Keys.D6),
+    //(Efflorescence, Some(Tank)) -> List(Keys.Alt, Keys.D7),
+    //(Ironbark, Some(Tank)) -> List(Keys.Alt, Keys.D8),
+    
+    (Rejuvenation, Some(HealerTwo)) -> List(Keys.Alt, Keys.D1),
+    (Regrowth, Some(HealerTwo)) -> List(Keys.Alt, Keys.D2),
+    //(HealingTouch, Some(Tank)) -> List(Keys.Alt, Keys.D3),
+    (Lifebloom, Some(HealerTwo)) -> List(Keys.Alt, Keys.D4),
+    (Swiftmend, Some(HealerTwo)) -> List(Keys.Alt, Keys.D5),
+    (WildGrowth, Some(HealerTwo)) -> List(Keys.Alt, Keys.D6),
+    (Efflorescence, Some(HealerTwo)) -> List(Keys.Alt, Keys.D7),
+    (Ironbark, Some(HealerTwo)) -> List(Keys.Alt, Keys.D8)
+    
+    // Special when focus on healing pets
+    //(WildGrowth, Some(Healer)) -> List(Keys.LShiftKey, Keys.F7),
+    //(WildGrowth, Some(HealerTwo)) -> List(Keys.LShiftKey, Keys.F7)
   )
   
 }

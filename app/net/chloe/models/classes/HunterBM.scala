@@ -56,7 +56,7 @@ case class HunterBM(
     //println("getEnnemiesCountInRange " + Player.getEnnemiesCountInRange)
     //println("areNameplatesOn " + Player.areNameplatesOn)
     //println(me.name + " Player.canCast(PrimalRage) " + Player.canCast(PrimalRage) + " Player.hasDebuff(Fatigued) " + Player.hasDebuff(Fatigued))
-      
+
     val canCastExhilaration = Player.canCast(Exhilaration)
     val canCastAspectOfTheTurtle = Player.canCast(AspectOfTheTurtle)
     val canCastSurvivalOfTheFittest = Player.canCast(SurvivalOfTheFittest)
@@ -75,19 +75,20 @@ case class HunterBM(
       isAnyoneInCombat && !Player.isChanneling
     ) {
       if (Pet.getHealthPercentage == 0 && Player.canCast(RevivePet)) {
+        sendAction(CallPet -> None)
         sendAction(RevivePet -> None)
-      } else if (Pet.getHealthPercentage < Configuration.MajorHealthThreshold && Player.canCast(RevivePet)) {
+      } else if (Pet.getHealthPercentage < Configuration.MajorHealthThreshold && Player.canCast(MendPet)) {
         sendAction(MendPet -> None)
       } else if (
         Player.getHealthPercentage < Configuration.CriticalHealthThreshold &&
-        (canCastAspectOfTheTurtle || canCastExhilaration || canCastSurvivalOfTheFittest)
+        (/*canCastAspectOfTheTurtle || */canCastExhilaration || canCastSurvivalOfTheFittest)
       ) {
         if (canCastExhilaration) {
           sendAction(Exhilaration -> None)
         } else if (canCastSurvivalOfTheFittest) { 
           sendAction(SurvivalOfTheFittest -> None)
         } else {
-          sendAction(AspectOfTheTurtle -> None)
+          //sendAction(AspectOfTheTurtle -> None)
         }
       //} else if (Target.canInterruptAsTeam) {
       //  sendAction(CounterShot -> None)
@@ -99,20 +100,8 @@ case class HunterBM(
       //  !Player.isMoving
       //) {
       //  sendAction(Barrage -> None)
-      } else if (
-        Player.canCast(MultiShot) && 
-        Player.getEnnemiesCountInRange > 1 &&
-        !Player.isMoving
-      ) {
-        sendAction(MultiShot -> None)
-      } else if (Player.canCast(AMurderOfCrows)) {
-        sendAction(AMurderOfCrows -> None)
       } else if (Player.canCast(Misdirection)) {
         sendAction(Misdirection -> None)
-      } else if (Player.canCast(FeignDeath) && misdirectionFinishedLately) {
-        sendAction(FeignDeath -> None)
-      } else if (Player.canCast(ChimaeraShot)) {
-        sendAction(ChimaeraShot -> None)
       } else if (Player.canCast(KillCommand)) {
         sendAction(KillCommand -> None)
       } else if (Player.canCast(BarbedShot)) {
@@ -121,8 +110,21 @@ case class HunterBM(
         sendAction(BestialWrath -> None)
       } else if (Player.canCast(AspectOfTheWild)) {
         sendAction(AspectOfTheWild -> None)
+      } else if (Player.canCast(AMurderOfCrows)) {
+        sendAction(AMurderOfCrows -> None)
+      //} else if (Player.canCast(FeignDeath) && misdirectionFinishedLately) {
+        //sendAction(FeignDeath -> None)
+        //Wow.pressAndReleaseKeystrokes(List(Keys.W))
+      } else if (Player.canCast(ChimaeraShot)) {
+        sendAction(ChimaeraShot -> None)
       //} else if (Player.canCast(DireBeast)) {
       //  sendAction(DireBeast -> None)
+      } else if (
+        Player.canCast(MultiShot) && 
+        Player.getEnnemiesCountInRange > 1 &&
+        !Player.isMoving
+      ) {
+        sendAction(MultiShot -> None)
       } else if (Player.canCast(CobraShot)) {
         sendAction(CobraShot -> None)
       } else {
@@ -157,7 +159,9 @@ object HunterBM {
     //(Barrage, None) -> List(Keys.Alt, Keys.F3),
     (ChimaeraShot, None) -> List(Keys.Alt, Keys.F5),
     (Misdirection, None) -> List(Keys.Alt, Keys.F9),
-    (FeignDeath, None) -> List(Keys.LShiftKey, Keys.F3)
+    //(Misdirection, None) -> List(Keys.D8),
+    (FeignDeath, None) -> List(Keys.LShiftKey, Keys.F3),
+    (CallPet, None) -> List(Keys.LShiftKey, Keys.D0)
   )
 
 }

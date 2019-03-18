@@ -31,5 +31,6 @@ package object win32 {
   object MouseActions {
     val WM_LBUTTONDOWN = 0x0201
     val WM_LBUTTONUP = 0x0202
+    val WM_XBUTTONDOWN = 0x020B
   }
 }
