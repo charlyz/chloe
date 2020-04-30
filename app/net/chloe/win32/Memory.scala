@@ -59,7 +59,7 @@ object Memory {
       .readMemory(
         hProcess.getPointer, 
         address, 
-        8
+        81
       )
       .getPointer(0)
   }

@@ -6,8 +6,8 @@ import net.chloe.models._
 object Configuration {
   
   val ScalingRatio = 10
-  val SlaveWindowWith = 960
-  val PrimaryWindowWith = 3840
+  val SlaveWindowWith = 688
+  val PrimaryWindowWith = 3440
   val MinimumTimeBetweenInterrupt = 2.seconds
   val PauseBetweenActions = 250.millis//2.seconds//200.millis
   

@@ -87,7 +87,7 @@ object Main {
     .toSet ++ hovStaticFieldSafeSpots
       
   def main(args: Array[String]) = {
-    val hWowWindows = Wow.getWindows("MegaBurst")
+    val hWowWindows = Wow.getWindows("CatWeave")
  
     val players: Map[SpellTargetType, WowClass] = hWowWindows
       .flatMap { hWowWindow =>
@@ -177,6 +177,38 @@ object Main {
           )
           
           Some(Healer -> player)
+        } else if (title.contains("Rooke")) {
+          val player = DruidRestoCatWeave(
+            name = "Rooke",
+            hWowWindow,
+            Healer
+          )
+          Wow.pressAndReleaseKeystroke(Keys.F8)(player)
+          Some(Healer -> player)
+        } else if (title.contains("Cayla")) {
+          val player = DruidRestoCatWeave(
+            name = "Cayla",
+            hWowWindow,
+            HealerTwo
+          )
+          Wow.pressAndReleaseKeystroke(Keys.F8)(player)
+          Some(HealerTwo -> player)
+        } else if (title.contains("Cynd")) {
+          val player = DruidRestoCatWeave(
+            name = "Cynd",
+            hWowWindow,
+            HealerThree
+          )
+          Wow.pressAndReleaseKeystroke(Keys.F8)(player)
+          Some(HealerThree -> player)
+        } else if (title.contains("Lirria")) {
+          val player = DruidRestoCatWeave(
+            name = "Lirria",
+            hWowWindow,
+            HealerFour
+          )
+          Wow.pressAndReleaseKeystroke(Keys.F8)(player)
+          Some(HealerFour -> player)
         } else {
           None
         }
@@ -185,7 +217,7 @@ object Main {
 
     implicit val team = Team(players)
 
-    if (team.players.size == 5) {
+    if (team.players.size == 4) {
       //refreshUnitLocationsForever(team)
       mouseHookStartStop(team)
       keyboardHookStartStop(team)
@@ -301,7 +333,7 @@ object Main {
                case _ =>
               }
             }
-            User32.CallNextHookEx(hhk, nCode, wParam, info.getPointer)
+            User32.CallNextHookEx(hhk, nCode, wParam, new LPARAM(info.getPointer))
           } 
         }
         

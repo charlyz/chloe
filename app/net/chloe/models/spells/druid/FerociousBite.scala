@@ -4,9 +4,9 @@ import net.chloe.models.spells._
 import net.chloe.models.auras._
 import scala.concurrent.duration._
 
-case object Swipe extends Cooldown {
-  val id = 106785
-  val cooldownIndexInAddon = 22
+case object FerociousBite extends Cooldown {
+  val id = 213826
+  val cooldownIndexInAddon = 21
   val hasCharges = false
   val needTarget = true
   val hasCooldownOtherThanGcd = false

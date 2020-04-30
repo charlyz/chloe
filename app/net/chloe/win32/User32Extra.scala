@@ -26,7 +26,7 @@ trait User32Extra extends JnaUser32 with StdCallLibrary with WinUser with WinNT 
 
   def SendMessage(hWnd: HWND, Msg: Int, wParam: Int, lParam: Int): Int
   
-  def SendMessage(hWnd: HWND, Msg: Int, wParam: WPARAM, lParam: LPARAM): Int
+  def SendMessage(hWnd: HWND, Msg: Int, wParam: WPARAM, lParam: LPARAM): LRESULT
   
   def FindWindowA(winClass: String, title: String): Pointer
   

@@ -488,7 +488,7 @@ object Wow {
 
   def nextScalingAction(implicit player: WowClass) = {
     val (currentWindowWidth, _) = getWindowSize
-    
+
     if (foundSentinel) {
       NoScaling
     } else {

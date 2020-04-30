@@ -10,3 +10,5 @@ case object DpsFour extends SpellTargetType
 case object DpsFive extends SpellTargetType
 case object Healer extends SpellTargetType
 case object HealerTwo extends SpellTargetType
+case object HealerThree extends SpellTargetType
+case object HealerFour extends SpellTargetType

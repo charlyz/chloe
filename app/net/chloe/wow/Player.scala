@@ -5,6 +5,7 @@ import com.sun.jna.platform.win32.WinDef.RECT
 import com.sun.jna.platform.win32.WinGDI
 import com.sun.jna.platform.win32.WinGDI.BITMAPINFO
 import scala.concurrent.ExecutionContext.Implicits._
+
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.WinUser._
 import com.sun.jna.Native
@@ -12,14 +13,17 @@ import net.chloe.win32._
 import net.chloe._
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC
 import java.awt.image.BufferedImage
+
 import com.sun.jna.platform.win32.WinDef._
 import scala.collection.mutable.ListBuffer
 import java.io._
 import java.awt.image._
 import javax.imageio._
+
 import net.chloe.models._
 import com.sun.jna.platform.win32.BaseTSD._
 import scala.util._
+
 import net.chloe.models.Color
 import net.chloe.Configuration
 import play.api.Logger
@@ -27,6 +31,7 @@ import net.chloe.models.classes._
 import net.chloe.models.auras._
 import net.chloe.models.spells._
 import scala.concurrent.duration._
+
 import org.joda.time._
 import net.chloe.win32.Memory
 import net.chloe.win32.Implicits._
@@ -35,6 +40,8 @@ import scala.collection.BitSet
 import scala.collection.mutable.{Set => MSet}
 import scala.concurrent._
 import scala.io.Source
+
+import net.chloe.models.spells.druid.{Rake, Shred}
 
 object Player {
   
@@ -809,6 +816,11 @@ object Player {
       color.getRedAsPercentage
     }
   }
+
+  def getComboPoints(implicit player: WowClass): Int = {
+    val color =  Wow.captureColor(column = 12, row = 1)
+    color.getGreenAsPercentage
+  }
   
   def getHastePercentage(implicit player: WowClass) = {
     val color =  Wow.captureColor(column = 10, row = 1)
@@ -890,6 +902,15 @@ object Player {
   }
   
   def isSpellInRange(cooldown: Cooldown)(implicit player: WowClass) = {
+    if (false && cooldown == Rake) {
+      val color = Wow.captureColor(column = cooldown.cooldownIndexInAddon, row = 3)
+      println(
+        s"""
+           |red ${color.red}
+           |gree ${color.green}
+           |blue ${color.blue}
+           |""".stripMargin)
+    }
     Wow
       .captureColor(column = cooldown.cooldownIndexInAddon, row = 3)
       .isRed
@@ -905,6 +926,13 @@ object Player {
     implicit player: WowClass
   ) = {
     val needTargetCheck = if (cooldown.needTarget) {
+      if (false && cooldown == Rake) {
+        println(
+          s"""
+             |Target.isVisible ${Target.isVisible}
+             |isSpellInRange(cooldown) ${isSpellInRange(cooldown)}
+             |""".stripMargin)
+      }
       Target.isVisible && isSpellInRange(cooldown)
     } else {
       true
@@ -939,7 +967,19 @@ object Player {
     } else {
       !isMoving
     } 
-    
+    if (false && cooldown == Rake) {
+      println(
+        s"""
+           |
+           |isCasting ${isCasting}
+           |isChanneling $isChanneling
+           |isSpellOnCooldownCheck $isSpellOnCooldownCheck
+           |needTargetCheck $needTargetCheck
+           |hasChargesCheck $hasChargesCheck
+           |isMovingCheck $isMovingCheck
+           |
+           |""".stripMargin)
+    }
     !isCasting && 
       !isChanneling && 
       isSpellOnCooldownCheck && 
